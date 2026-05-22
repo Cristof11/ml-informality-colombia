@@ -1,6 +1,3 @@
-import sys
-import os
-sys.path.insert(0, os.path.dirname(__file__))
+from main import app
 
-from app import app as application
-app = application
+application = app
