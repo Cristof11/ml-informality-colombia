@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Data Engineering{% endblock %}
+
+{% block content %}
+<p class="section-label">Phase 03 · CRISP-ML</p>
+<h1>Data Engineering</h1>
+<p class="lead">8-step preprocessing pipeline applied to the EMICRON 2023 dataset: cleaning, encoding, feature engineering, and normalization — all documented and reproducible.</p>
+
+{% if result.error %}
+<div class="alert" style="margin-top:2rem">
+  ⚠️ <strong>{{ result.error }}</strong><br>
+  <small>Place <code>emicron_sample.csv</code> in the <code>data/</code> folder. <a href="https://microdatos.dane.gov.co/index.php/catalog/832" target="_blank">Download EMICRON 2023 →</a></small>
+</div>
+{% else %}
+
+<!-- Summary cards -->
+{% if result.summary %}
+<div class="stat-grid" style="margin-top:2rem">
+  <div class="stat-card">
+    <div class="stat-num" style="font-size:1.4rem">{{ result.summary.original_records }}</div>
+    <div class="stat-label">Original Records</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="font-size:1.4rem">{{ result.summary.final_cols }}</div>
+    <div class="stat-label">Columns After Pipeline</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="font-size:1.4rem">{{ result.summary.informality_mean }}</div>
+    <div class="stat-label">Mean Informality Index</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="font-size:1.4rem">{{ result.summary.fully_informal_pct }}<span>%</span></div>
+    <div class="stat-label">Fully Informal Records</div>
+  </div>
+</div>
+{% endif %}
+
+<hr class="section-sep"/>
+
+<!-- Variable label map -->
+<h2>Dataset Variable Reference</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Key EMICRON variables used in this pipeline (from DDI/XML documentation):</p>
+<div class="card" style="margin-top:1.25rem;overflow-x:auto">
+  <table class="log-table">
+    <thead><tr><th>Variable Code</th><th>Description (EMICRON DDI)</th><th>Type</th></tr></thead>
+    <tbody>
+    {% for code, desc in result.label_map.items() %}
+    <tr>
+      <td><code style="color:var(--accent2)">{{ code }}</code></td>
+      <td style="color:var(--muted)">{{ desc }}</td>
+      <td>
+        {% if code in ['P3034','P3035','P3088'] %}
+          <span style="color:var(--accent3);font-size:.78rem">Numerical</span>
+        {% elif code in ['DPTO','P3053'] %}
+          <span style="color:#ffa500;font-size:.78rem">Categorical</span>
+        {% else %}
+          <span style="color:var(--accent);font-size:.78rem">Binary</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<hr class="section-sep"/>
+
+<!-- Pipeline log -->
+<h2>Transformation Pipeline — Step by Step</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Each transformation is logged with its effect on the dataset shape.</p>
+
+{% if result.log %}
+<table class="log-table" style="margin-top:1.5rem">
+  <thead>
+    <tr>
+      <th style="width:22%">Step</th>
+      <th>Description</th>
+      <th style="width:16%">Shape After</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for entry in result.log %}
+  <tr>
+    <td><span class="step-badge">{{ entry.step }}</span></td>
+    <td style="color:var(--muted);font-size:.86rem">{{ entry.detail }}</td>
+    <td style="font-family:monospace;font-size:.82rem;color:var(--accent3)">{{ entry.shape[0] }} × {{ entry.shape[1] }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<hr class="section-sep"/>
+
+<!-- Informality Index explanation -->
+<h2>Feature Engineering — Informality Index</h2>
+<div class="two-col" style="margin-top:1.5rem">
+  <div class="card" style="border-color:rgba(232,71,138,.25)">
+    <h3>📐 Formula</h3>
+    <p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">
+      <code style="color:var(--accent);background:rgba(232,71,138,.1);padding:.2rem .5rem;border-radius:4px;font-size:.9rem">
+        informality_index = 1 − mean(RUT_bin, CC_bin, ARL_bin, has_accounting)
+      </code>
+    </p>
+    <p style="color:var(--muted);font-size:.85rem;margin-top:.75rem">Range: <strong style="color:var(--white)">0</strong> (fully formal) → <strong style="color:var(--accent)">1.0</strong> (fully informal). Each flag = 1 if the business HAS the formal attribute, 0 if not.</p>
+  </div>
+  <div class="card" style="border-color:rgba(0,212,170,.25)">
+    <h3>🔑 Flag Variables</h3>
+    <ul class="diamond-list c3" style="margin-top:.5rem">
+      <li><span class="dot">◆</span><span><code>P1633_bin</code> — Has RUT (tax ID): 1=Yes, 0=No</span></li>
+      <li><span class="dot">◆</span><span><code>P1055_bin</code> — Chamber of Commerce: 1=Yes, 0=No</span></li>
+      <li><span class="dot">◆</span><span><code>P3091_bin</code> — ARL contribution: 1=Yes, 0=No</span></li>
+      <li><span class="dot">◆</span><span><code>has_accounting</code> — Keeps records (P640 ≠ 5): 1=Yes, 0=No</span></li>
+    </ul>
+  </div>
+</div>
+
+<hr class="section-sep"/>
+
+<!-- Normalization -->
+<h2>Normalization & Encoding</h2>
+<div class="feat-grid">
+  <div class="feat-item">
+    <div class="fi">⚖️</div>
+    <div>
+      <strong>StandardScaler</strong>
+      <span>Applied to P3034 (workers), P3035 (months in operation), P3088 (monthly sales). Produces mean≈0, std≈1 for each numeric variable.</span>
+    </div>
+  </div>
+  <div class="feat-item">
+    <div class="fi">🔢</div>
+    <div>
+      <strong>One-Hot Encoding</strong>
+      <span>pd.get_dummies applied to P3053 (CIIU sector). Drop_first=True to avoid multicollinearity. Each category becomes a binary column.</span>
+    </div>
+  </div>
+  <div class="feat-item">
+    <div class="fi">🧹</div>
+    <div>
+      <strong>Null Imputation</strong>
+      <span>Categorical variables: mode imputation. Numerical variables: median imputation by sector and city — prevents bias from non-response patterns.</span>
+    </div>
+  </div>
+  <div class="feat-item">
+    <div class="fi">📝</div>
+    <div>
+      <strong>Documented Pipeline</strong>
+      <span>All steps logged with before/after shape. Reproducible via the data_engineering_controller.py — re-run by calling GET /data-engineering.</span>
+    </div>
+  </div>
+</div>
+
+<!-- Sample output -->
+{% if result.sample %}
+<hr class="section-sep"/>
+<h2>Sample Output (first 5 records after pipeline)</h2>
+<div class="card" style="margin-top:1.5rem;overflow-x:auto">
+  {{ result.sample | safe }}
+</div>
+{% endif %}
+
+{% endif %}
+
+<div class="quote-block" style="margin-top:3rem">
+  <p>"All transformations and decisions must be meticulously documented to ensure process reproducibility, facilitating future revisions or updates to the model."</p>
+  <cite class="quote-cite">— ML-Ops.org · Best practices in data engineering for ML production projects.</cite>
+</div>
+{% endblock %}

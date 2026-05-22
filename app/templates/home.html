@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<p class="section-label">Machine Learning Project · CRISP-ML(Q) · DANE EMICRON 2023</p>
+<h1>Intelligent System to Detect<br><span style="background:linear-gradient(135deg,#e8478a,#6c63ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Commercial Informality Patterns</span></h1>
+<p class="lead">Using the EMICRON 2023 dataset (DANE) and K-Means clustering to identify commercial informality profiles across Colombian cities — enabling smarter, data-driven formalization policy.</p>
+
+<div class="stat-grid" style="margin-top:2.5rem">
+  <div class="stat-card">
+    <div class="stat-num">55<span>.8%</span></div>
+    <div class="stat-label">National Informality Rate (2024)</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">84<span>.7%</span></div>
+    <div class="stat-label">Informality in Micro-businesses</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">81<span>K+</span></div>
+    <div class="stat-label">Records in EMICRON 2023</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">24<span>+DC</span></div>
+    <div class="stat-label">Departments Covered</div>
+  </div>
+</div>
+
+<div class="pipeline-strip">
+  <div class="pipeline-inner">
+    <div class="pipe-step active">① Business Understanding</div>
+    <div class="pipe-arrow">›</div>
+    <div class="pipe-step active">② Data Understanding</div>
+    <div class="pipe-arrow">›</div>
+    <div class="pipe-step active">③ Data Engineering</div>
+    <div class="pipe-arrow">›</div>
+    <div class="pipe-step">④ Model Engineering</div>
+    <div class="pipe-arrow">›</div>
+    <div class="pipe-step">⑤ Model Quality</div>
+    <div class="pipe-arrow">›</div>
+    <div class="pipe-step">⑥ Deployment</div>
+  </div>
+</div>
+
+<div class="two-col" style="margin-top:2rem">
+  <div class="card">
+    <div class="card-icon" style="background:rgba(232,71,138,.15)">🎯</div>
+    <h3>Project Goal</h3>
+    <p style="color:var(--muted);font-size:.9rem">Apply K-Means clustering to the EMICRON dataset to automatically segment Colombian micro-businesses by informality profile, giving policymakers actionable city-level intelligence.</p>
+  </div>
+  <div class="card">
+    <div class="card-icon" style="background:rgba(108,99,255,.15)">🗄️</div>
+    <h3>Dataset · EMICRON 2023</h3>
+    <p style="color:var(--muted);font-size:.9rem">Official DANE survey of micro-businesses with up to 9 employees. 81,018 records across 24 departments + Bogotá D.C., covering 7 modules including formalization variables (RUT, ARL, Cámara de Comercio).</p>
+  </div>
+</div>
+
+<div class="two-col">
+  <a href="/business-understanding" style="text-decoration:none">
+    <div class="card" style="cursor:pointer;transition:transform .2s;border-color:rgba(232,71,138,.2)" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <p class="section-label">Phase 01</p>
+      <h3>Business Understanding →</h3>
+      <p style="color:var(--muted);font-size:.88rem">Problem context, objectives, key questions, feasibility analysis and expected impact.</p>
+    </div>
+  </a>
+  <a href="/data-understanding" style="text-decoration:none">
+    <div class="card" style="cursor:pointer;transition:transform .2s;border-color:rgba(108,99,255,.2)" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <p class="section-label">Phase 02</p>
+      <h3>Data Understanding →</h3>
+      <p style="color:var(--muted);font-size:.88rem">EDA, variable analysis, missing values, statistical summaries and correlations on the EMICRON dataset.</p>
+    </div>
+  </a>
+  <a href="/data-engineering" style="text-decoration:none">
+    <div class="card" style="cursor:pointer;transition:transform .2s;border-color:rgba(0,212,170,.2)" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <p class="section-label">Phase 03</p>
+      <h3>Data Engineering →</h3>
+      <p style="color:var(--muted);font-size:.88rem">Data cleaning, null handling, encoding, feature engineering (Informality Index) and normalization pipeline.</p>
+    </div>
+  </a>
+  <a href="/crisp-ml" style="text-decoration:none">
+    <div class="card" style="cursor:pointer;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <p class="section-label">Methodology</p>
+      <h3>CRISP-ML(Q) →</h3>
+      <p style="color:var(--muted);font-size:.88rem">Overview of the Cross-Industry Standard Process for Machine Learning with Quality Assurance.</p>
+    </div>
+  </a>
+</div>
+{% endblock %}

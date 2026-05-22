@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Data Understanding{% endblock %}
+
+{% block content %}
+<p class="section-label">Phase 02 · CRISP-ML</p>
+<h1>Data Understanding</h1>
+<p class="lead">Exploratory analysis of the <strong style="color:var(--white)">EMICRON 2023</strong> dataset — 81,018 micro-business records from DANE, covering 24 departments and Bogotá D.C.</p>
+
+{% if stats.error %}
+<div class="alert" style="margin-top:2rem">
+  ⚠️ <strong>{{ stats.error }}</strong><br>
+  <small>Download the microdata CSV and place it at <code>data/emicron_sample.csv</code>. <a href="https://microdatos.dane.gov.co/index.php/catalog/832" target="_blank">Download EMICRON 2023 →</a></small>
+</div>
+{% else %}
+
+<!-- Basic stats -->
+<div class="stat-grid" style="margin-top:2rem">
+  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem">{{ stats.n_records | default('—') }}</div><div class="stat-label">Total Records</div></div>
+  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem">{{ stats.n_variables | default('—') }}</div><div class="stat-label">Variables</div></div>
+  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem">{{ stats.missing | length }}</div><div class="stat-label">Cols with Missing Values</div></div>
+  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem">81<span>K</span></div><div class="stat-label">EMICRON Full Dataset</div></div>
+</div>
+
+<hr class="section-sep"/>
+
+<!-- Variable list -->
+<h2>Variables in Dataset</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Columns loaded from the sample CSV:</p>
+<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem">
+  {% for col in stats.columns | default([]) %}
+  <span style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.25rem .65rem;font-size:.8rem;color:var(--muted)">{{ col }}</span>
+  {% endfor %}
+</div>
+
+<hr class="section-sep"/>
+
+<!-- Missing values -->
+<h2>Missing Value Analysis</h2>
+{% if stats.missing %}
+<div class="card" style="margin-top:1.5rem;overflow-x:auto">
+  <table class="log-table">
+    <thead><tr><th>Variable</th><th>Missing %</th><th>Risk Level</th></tr></thead>
+    <tbody>
+    {% for col, pct in stats.missing.items() %}
+    <tr>
+      <td><code style="color:var(--accent2)">{{ col }}</code></td>
+      <td>{{ pct }}%</td>
+      <td>
+        {% if pct > 20 %}<span style="color:#e8478a;font-weight:600">High</span>
+        {% elif pct > 5 %}<span style="color:#ffa500;font-weight:600">Medium</span>
+        {% else %}<span style="color:var(--accent3);font-weight:600">Low</span>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p style="color:var(--accent3);margin-top:1rem">✅ No missing values detected in the loaded columns.</p>
+{% endif %}
+
+<hr class="section-sep"/>
+
+<!-- Numeric summary -->
+<h2>Statistical Summary — Numerical Variables</h2>
+{% if stats.numeric_summary %}
+<div class="card" style="margin-top:1.5rem;overflow-x:auto">
+  {{ stats.numeric_summary | safe }}
+</div>
+{% endif %}
+
+<hr class="section-sep"/>
+
+<!-- Key variable distributions -->
+<h2>Variable Analysis — Key Formalization Indicators</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Distribution of the most important variables for informality detection (from EMICRON Module F):</p>
+
+<div class="feat-grid" style="margin-top:1.5rem">
+  <div class="feat-item" style="border-color:rgba(232,71,138,.3)">
+    <div class="fi">🪪</div>
+    <div>
+      <strong>P1633 · Has RUT (tax ID)</strong>
+      <span>Binary: 1=Yes, 2=No. Key formal registration indicator. Nationally ~77.6% of micro-businesses have NO RUT (2024).</span>
+    </div>
+  </div>
+  <div class="feat-item" style="border-color:rgba(108,99,255,.3)">
+    <div class="fi">🏛️</div>
+    <div>
+      <strong>P1055 · Chamber of Commerce</strong>
+      <span>Binary: 1=Yes, 2=No. In Bogotá (2023) only 27.1% of micro-businesses were registered.</span>
+    </div>
+  </div>
+  <div class="feat-item" style="border-color:rgba(0,212,170,.3)">
+    <div class="fi">🏥</div>
+    <div>
+      <strong>P3091 · ARL Contribution</strong>
+      <span>Occupational risk insurance contribution. 93.6% of owners made no ARL contributions in 2024 (EMICRON).</span>
+    </div>
+  </div>
+  <div class="feat-item" style="border-color:rgba(255,165,0,.3)">
+    <div class="fi">📋</div>
+    <div>
+      <strong>P640 · Accounting Records</strong>
+      <span>5-category: balance sheet / daily log / informal notes / financial reports / no records. 46.2% kept no records (Bogotá, SDDE-ODEB 2023).</span>
+    </div>
+  </div>
+  <div class="feat-item">
+    <div class="fi">💰</div>
+    <div>
+      <strong>P3088 · Monthly Sales</strong>
+      <span>Previous month sales in COP. Continuous numeric variable. ~7% imputation rate due to non-response.</span>
+    </div>
+  </div>
+  <div class="feat-item">
+    <div class="fi">🔢</div>
+    <div>
+      <strong>P3053 · CIIU Sector Code</strong>
+      <span>Economic activity classification (CIIU Rev. 4 AC). Covers agriculture, manufacturing, commerce, construction, transport, services.</span>
+    </div>
+  </div>
+</div>
+
+{% if stats.cat_stats %}
+<hr class="section-sep"/>
+<h2>Categorical Variable Distributions</h2>
+<div class="card-grid" style="margin-top:1.5rem">
+  {% for col, counts in stats.cat_stats.items() %}
+  <div class="card">
+    <h3 style="font-size:.88rem;margin-bottom:1rem"><code style="color:var(--accent2)">{{ col }}</code></h3>
+    {% for val, freq in counts.items() %}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem;font-size:.82rem">
+      <span style="color:var(--muted)">{{ val }}</span>
+      <span style="color:var(--white);font-weight:600">{{ freq }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if stats.correlation %}
+<hr class="section-sep"/>
+<h2>Correlation Matrix</h2>
+<div class="card" style="margin-top:1.5rem;overflow-x:auto">
+  {{ stats.correlation | safe }}
+</div>
+{% endif %}
+
+{% endif %}
+
+<div class="quote-block" style="margin-top:3rem">
+  <p>"Exploring data quality, completeness, and statistical properties before modelling is not optional — it is the foundation that determines whether the resulting model is trustworthy or misleading."</p>
+  <cite class="quote-cite">— Adapted from: CRISP-ML(Q) Data Understanding phase guidelines. Schmid et al. (2020).</cite>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}CRISP-ML Methodology{% endblock %}
+
+{% block content %}
+<p class="section-label">Methodology</p>
+<h1>CRISP-ML(Q)</h1>
+<p class="lead">Cross-Industry Standard Process for Machine Learning with Quality Assurance — the structured framework guiding this project from problem definition to deployment.</p>
+
+<div class="quote-block">
+  <p>"CRISP-ML(Q) extends the well-known CRISP-DM process model to address the specific requirements of machine learning projects, adding a quality assurance layer to each phase."</p>
+  <cite class="quote-cite">— Symeon Symeonidis et al. (2022). A CRISP-ML(Q) Reference Checklist for Responsible ML.</cite>
+</div>
+
+<hr class="section-sep"/>
+<h2>The 6 Phases</h2>
+
+<div style="margin-top:1.75rem">
+
+  <div class="phase-row" style="border-left:3px solid var(--accent)">
+    <div class="phase-icon" style="border-color:rgba(232,71,138,.4)">🎯</div>
+    <div class="phase-label">
+      <div class="phase-num">Phase 01 · Active</div>
+      <h3>Business Understanding</h3>
+    </div>
+    <div>
+      <p style="font-size:.88rem;color:var(--muted)">Define the ML problem in business terms. Identify stakeholders, establish success criteria, assess feasibility and document risks. For this project: characterize commercial informality patterns in Colombian cities using open EMICRON data.</p>
+      <a href="/business-understanding" style="color:var(--accent);font-size:.82rem;font-weight:600">View Phase →</a>
+    </div>
+  </div>
+
+  <div class="phase-row" style="border-left:3px solid var(--accent2)">
+    <div class="phase-icon" style="border-color:rgba(108,99,255,.4)">📊</div>
+    <div class="phase-label">
+      <div class="phase-num" style="color:var(--accent2)">Phase 02 · Active</div>
+      <h3>Data Understanding</h3>
+    </div>
+    <div>
+      <p style="font-size:.88rem;color:var(--muted)">Explore the EMICRON 2023 dataset: variable analysis, missing value assessment, statistical summaries, distribution analysis, and correlation matrix across 81,018 micro-business records in 24+ departments.</p>
+      <a href="/data-understanding" style="color:var(--accent2);font-size:.82rem;font-weight:600">View Phase →</a>
+    </div>
+  </div>
+
+  <div class="phase-row" style="border-left:3px solid var(--accent3)">
+    <div class="phase-icon" style="border-color:rgba(0,212,170,.4)">⚙️</div>
+    <div class="phase-label">
+      <div class="phase-num" style="color:var(--accent3)">Phase 03 · Active</div>
+      <h3>Data Engineering</h3>
+    </div>
+    <div>
+      <p style="font-size:.88rem;color:var(--muted)">8-step pipeline: drop ID columns → feature selection → null imputation → binary encoding of formality flags → accounting records encoding → Informality Index engineering → StandardScaler normalization → One-Hot Encoding of CIIU sector.</p>
+      <a href="/data-engineering" style="color:var(--accent3);font-size:.82rem;font-weight:600">View Phase →</a>
+    </div>
+  </div>
+
+  <div class="phase-row" style="opacity:.55">
+    <div class="phase-icon">🤖</div>
+    <div class="phase-label">
+      <div class="phase-num">Phase 04 · Pending</div>
+      <h3>Model Engineering</h3>
+    </div>
+    <div>
+      <p style="font-size:.88rem;color:var(--muted)">Select, configure and train the K-Means clustering model. Determine optimal k via Elbow Method and Silhouette Coefficient. Apply PCA for dimensionality reduction and visualization.</p>
+    </div>
+  </div>
+
+  <div class="phase-row" style="opacity:.55">
+    <div class="phase-icon">✅</div>
+    <div class="phase-label">
+      <div class="phase-num">Phase 05 · Pending</div>
+      <h3>Model Quality</h3>
+    </div>
+    <div>
+      <p style="font-size:.88rem;color:var(--muted)">Evaluate clusters with Silhouette Score (target ≥ 0.4), Davies-Bouldin Index, and WCSS. Interpret cluster profiles in business terms. Validate against known GEIH city-level informality rates.</p>
+    </div>
+  </div>
+
+  <div class="phase-row" style="opacity:.55">
+    <div class="phase-icon">🚀</div>
+    <div class="phase-label">
+      <div class="phase-num">Phase 06 · Pending</div>
+      <h3>Deployment & Monitoring</h3>
+    </div>
+    <div>
+      <p style="font-size:.88rem;color:var(--muted)">Deploy the trained pipeline as a REST API endpoint. Monitor cluster drift as new annual EMICRON data is released. Update model yearly.</p>
+    </div>
+  </div>
+
+</div>
+
+<hr class="section-sep"/>
+<div class="two-col">
+  <div class="info-box">
+    <h4>📖 Key Reference</h4>
+    <p>Schmid, Wurst & Wirth (2020). <em>CRISP-ML(Q): A Machine Learning Process Model with Quality Assurance Methodology.</em> arXiv:2003.05155</p>
+  </div>
+  <div class="info-box">
+    <h4>🗄️ Dataset Reference</h4>
+    <p>DANE (2023). <em>Encuesta de Micronegocios — EMICRON 2023.</em> Dirección de Metodología y Producción Estadística (DIMPE). microdatos.dane.gov.co/index.php/catalog/832</p>
+  </div>
+</div>
+{% endblock %}

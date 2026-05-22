@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Business Understanding{% endblock %}
+
+{% block content %}
+<p class="section-label">Phase 01 · CRISP-ML</p>
+<h1>Business Understanding</h1>
+<p class="lead">According to DANE's GEIH (2024), <strong style="color:var(--white)">55.8% of all employed workers</strong> in Colombia operate informally — and the rate jumps to <strong style="color:var(--accent)">84.7% inside micro-businesses</strong>. This project uses open EMICRON data to make that problem measurable and actionable.</p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="stat-num">55<span>.8%</span></div><div class="stat-label">National informality rate (2024)</div></div>
+  <div class="stat-card"><div class="stat-num">84<span>.7%</span></div><div class="stat-label">Informality in micro-businesses</div></div>
+  <div class="stat-card"><div class="stat-num">77<span>.6%</span></div><div class="stat-label">Micro-businesses without RUT (2024)</div></div>
+  <div class="stat-card"><div class="stat-num">93<span>.6%</span></div><div class="stat-label">Owners with no ARL contribution</div></div>
+</div>
+
+<hr class="section-sep"/>
+
+<!-- 4 horizontal phase cards -->
+<div class="phase-row c1" style="border-left:3px solid var(--accent)">
+  <div class="phase-icon" style="border-color:rgba(232,71,138,.4);background:rgba(232,71,138,.08)">🎯</div>
+  <div class="phase-label">
+    <div class="phase-num">01 · Objective</div>
+    <h3>Business Objectives</h3>
+  </div>
+  <ul class="diamond-list c1">
+    <li><span class="dot">◆</span><span>Apply K-Means clustering to the DANE EMICRON dataset to automatically segment Colombian micro-businesses into distinct informality profiles.</span></li>
+    <li><span class="dot">◆</span><span>Give local governments and chambers of commerce a data-driven tool to prioritize formalization efforts — moving beyond the blunt national average (55.8%) toward actionable, city-level intelligence.</span></li>
+    <li><span class="dot">◆</span><span>Identify which segments are closest to formalization ("gateway clusters") so that MinCIT and DNP can design targeted incentive programs with the highest return on public investment.</span></li>
+    <li><span class="dot">◆</span><span>Produce a reproducible pipeline that can be re-run each year as new EMICRON data is released, enabling longitudinal tracking of informality cluster evolution across Colombia.</span></li>
+  </ul>
+</div>
+
+<div class="phase-row c2" style="border-left:3px solid var(--accent2)">
+  <div class="phase-icon" style="border-color:rgba(108,99,255,.4);background:rgba(108,99,255,.08)">❓</div>
+  <div class="phase-label">
+    <div class="phase-num" style="color:var(--accent2)">02 · Questions</div>
+    <h3>Key Questions</h3>
+  </div>
+  <ul class="diamond-list c2">
+    <li><span class="dot">◆</span><span>Which combination of variables (income, RUT, ARL, location, sector) best predicts informality level?</span></li>
+    <li><span class="dot">◆</span><span>Which cities show the highest concentration of high-risk clusters?</span></li>
+    <li><span class="dot">◆</span><span>Can we identify a "gateway to formality" profile — businesses that are informal but almost ready to formalize?</span></li>
+  </ul>
+</div>
+
+<div class="phase-row c3" style="border-left:3px solid var(--accent3)">
+  <div class="phase-icon" style="border-color:rgba(0,212,170,.4);background:rgba(0,212,170,.08)">📊</div>
+  <div class="phase-label">
+    <div class="phase-num" style="color:var(--accent3)">03 · Data</div>
+    <h3>Data Assessment</h3>
+  </div>
+  <ul class="diamond-list c3">
+    <li><span class="dot">◆</span><span>Primary source: <strong style="color:var(--white)">EMICRON 2023</strong> (DANE) — 81,018 records. Covers micro-businesses with up to 9 employees across 24 departments and Bogotá D.C.</span></li>
+    <li><span class="dot">◆</span><span>The dataset includes <strong style="color:var(--white)">7 structured modules</strong>: economic activity (CIIU), entrepreneurship history, location type, workforce profile, business formalization, ICT usage, and financial inclusion.</span></li>
+    <li><span class="dot">◆</span><span>Complementary source: <strong style="color:var(--white)">GEIH 2024</strong> — used to validate city-level informality rates and enrich the model with regional labor market context.</span></li>
+    <li><span class="dot">◆</span><span>Data quality note: monthly sales field (P3088) had a ~7% missing rate in 2024 — handled via median imputation by sector and city.</span></li>
+  </ul>
+</div>
+
+<div class="phase-row c4" style="border-left:3px solid #ffa500">
+  <div class="phase-icon" style="border-color:rgba(255,165,0,.4);background:rgba(255,165,0,.08)">⚖️</div>
+  <div class="phase-label">
+    <div class="phase-num" style="color:#ffa500">04 · Viability</div>
+    <h3>Feasibility Analysis</h3>
+  </div>
+  <ul class="diamond-list c4">
+    <li><span class="dot">◆</span><span><strong style="color:var(--white)">Technically viable:</strong> EMICRON is publicly available, annually updated, and documented with a DDI/XML data dictionary. All dependencies are open-source Python libraries.</span></li>
+    <li><span class="dot">◆</span><span><strong style="color:var(--white)">Privacy constraint:</strong> the dataset is anonymized by DANE — direct and pseudo-identifiers removed. Sub-municipal spatial analysis is not possible.</span></li>
+    <li><span class="dot">◆</span><span><strong style="color:var(--white)">Coverage gap:</strong> EMICRON does not cover 8 low-density departments (Arauca, Casanare, Vichada, Guainía, Guaviare, Vaupés, Putumayo, Amazonas).</span></li>
+    <li><span class="dot">◆</span><span><strong style="color:var(--white)">Ethical consideration:</strong> cluster labels must be framed as structural policy targets — not judgments on individual businesses. Findings should inform incentives, not penalties.</span></li>
+  </ul>
+</div>
+
+<hr class="section-sep"/>
+<h2>Why This Problem Matters</h2>
+<div class="two-col" style="margin-top:1.5rem">
+  <div>
+    <p style="color:var(--muted);font-size:.93rem">Cities with the <strong style="color:var(--white)">highest informality rates</strong> (GEIH, 2023): Sincelejo (70%), Riohacha (63.9%), Valledupar (63.3%). Lowest: Bogotá (32.9%), Manizales (34.2%), Medellín (37%). This 37-point spread shows informality is highly localized — exactly the pattern K-Means clustering can detect.</p>
+    <br>
+    <p style="color:var(--muted);font-size:.93rem">Meanwhile, <strong style="color:var(--accent)">93.6% of micro-business owners</strong> made no ARL contributions in 2024, leaving millions of workers completely without occupational risk protection.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:1rem">
+    <div class="info-box">
+      <h4>📍 Cities in Scope</h4>
+      <p>EMICRON covers 24 departments + Bogotá D.C., with city-level breakdowns for the 23 main metropolitan areas tracked by GEIH — including Sincelejo, Barranquilla, Cali, Medellín, and Bogotá.</p>
+    </div>
+    <div class="info-box">
+      <h4>🎓 Stakeholders</h4>
+      <p>Municipal governments, MinCIT, Chambers of Commerce, DNP (Departamento Nacional de Planeación), academic researchers in labor economics and public policy.</p>
+    </div>
+  </div>
+</div>
+
+<div class="quote-block" style="margin-top:2.5rem">
+  <p>"In this initial phase, it is essential to deeply understand the business objectives and translate them into concrete goals for the project. This stage ensures that the technical effort is aligned with the value expected by the organization."</p>
+  <cite class="quote-cite">— Schmid, Wurst, & Wirth (2020). CRISP-ML(Q): A Machine Learning Process Model with Quality Assurance Methodology.</cite>
+</div>
+{% endblock %}
