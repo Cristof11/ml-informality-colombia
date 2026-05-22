@@ -13,23 +13,63 @@
 </div>
 {% else %}
 
+<!-- EDA Introduction -->
+<div class="card" style="margin-top:2rem;border-color:rgba(108,99,255,.25)">
+  <h3 style="margin-bottom:.75rem">🔍 Exploratory Data Analysis (EDA)</h3>
+  <p style="color:var(--muted);font-size:.9rem">EDA is the process of summarizing, visualizing, and understanding the main characteristics of a dataset before applying any model. For this project, EDA serves three purposes: (1) understand the distribution of informality-related variables across Colombian micro-businesses, (2) identify data quality issues — particularly missing values in key formalization indicators, and (3) detect correlations between features that will inform the K-Means clustering model. The EMICRON 2023 dataset was selected because it is the most comprehensive official source for micro-business informality in Colombia, with 81,018 anonymized records across 7 structured survey modules.</p>
+</div>
+
 <!-- Basic stats -->
 <div class="stat-grid" style="margin-top:2rem">
-  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem">{{ stats.n_records | default('—') }}</div><div class="stat-label">Total Records</div></div>
-  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem">{{ stats.n_variables | default('—') }}</div><div class="stat-label">Variables</div></div>
+  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem">{{ stats.n_records | default('—') }}</div><div class="stat-label">Total Records (sample)</div></div>
+  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem">{{ stats.n_variables | default('—') }}</div><div class="stat-label">Variables Loaded</div></div>
   <div class="stat-card"><div class="stat-num" style="font-size:1.5rem">{{ stats.missing | length }}</div><div class="stat-label">Cols with Missing Values</div></div>
-  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem">81<span>K</span></div><div class="stat-label">EMICRON Full Dataset</div></div>
+  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem">81<span>K</span></div><div class="stat-label">EMICRON Full Dataset Size</div></div>
 </div>
 
 <hr class="section-sep"/>
 
+<!-- Dataset Description -->
+<h2>Dataset Description</h2>
+<div class="two-col" style="margin-top:1.5rem">
+  <div class="info-box" style="border-color:rgba(108,99,255,.25)">
+    <h4>📦 Source</h4>
+    <p><strong style="color:var(--white)">DANE — Encuesta de Micronegocios (EMICRON) 2023</strong><br>
+    Public microdata available at microdatos.dane.gov.co/index.php/catalog/832<br>
+    Updated annually. Version 2 released August 2025.</p>
+  </div>
+  <div class="info-box" style="border-color:rgba(0,212,170,.25)">
+    <h4>✅ Meets Requirements</h4>
+    <p>81,018 records <strong style="color:var(--accent3)">(well above 1,000 minimum)</strong><br>
+    Multiple numerical variables: income, workers, months operating<br>
+    Multiple categorical variables: CIIU sector, department, location type, formalization flags<br>
+    Real-world context: official Colombian government survey</p>
+  </div>
+</div>
+
 <!-- Variable list -->
-<h2>Variables in Dataset</h2>
-<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Columns loaded from the sample CSV:</p>
+<hr class="section-sep"/>
+<h2>Variable Analysis</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Columns loaded from the EMICRON sample CSV — real variable names from the DDI/XML data dictionary:</p>
 <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem">
   {% for col in stats.columns | default([]) %}
   <span style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.25rem .65rem;font-size:.8rem;color:var(--muted)">{{ col }}</span>
   {% endfor %}
+</div>
+
+<hr class="section-sep"/>
+
+<!-- Data Quality Evaluation -->
+<h2>Data Quality Evaluation</h2>
+<div class="two-col" style="margin-top:1.5rem">
+  <div class="info-box" style="border-color:rgba(0,212,170,.25)">
+    <h4 style="color:var(--accent3)">✅ Strengths</h4>
+    <p style="font-size:.88rem;color:var(--muted)">Official DANE survey with strict quality control protocols. Uses CAPI (Computer-Assisted Personal Interviewing) via DMC devices. Data validated by a technical committee including DNP, MinCIT, and academia before publication. Anonymization protocol documented and publicly available.</p>
+  </div>
+  <div class="info-box" style="border-color:rgba(232,71,138,.25)">
+    <h4 style="color:var(--accent)">⚠️ Known Issues</h4>
+    <p style="font-size:.88rem;color:var(--muted)">Self-reported income (P3088) has ~7% missing rate due to non-response. Some categorical variables use numeric codes requiring mapping from the DDI/XML dictionary. 8 low-density departments excluded from sampling frame. Informality flags are binary and may undercount partial compliance cases.</p>
+  </div>
 </div>
 
 <hr class="section-sep"/>
@@ -39,7 +79,7 @@
 {% if stats.missing %}
 <div class="card" style="margin-top:1.5rem;overflow-x:auto">
   <table class="log-table">
-    <thead><tr><th>Variable</th><th>Missing %</th><th>Risk Level</th></tr></thead>
+    <thead><tr><th>Variable</th><th>Missing %</th><th>Risk Level</th><th>Handling Strategy</th></tr></thead>
     <tbody>
     {% for col, pct in stats.missing.items() %}
     <tr>
@@ -49,6 +89,9 @@
         {% if pct > 20 %}<span style="color:#e8478a;font-weight:600">High</span>
         {% elif pct > 5 %}<span style="color:#ffa500;font-weight:600">Medium</span>
         {% else %}<span style="color:var(--accent3);font-weight:600">Low</span>{% endif %}
+      </td>
+      <td style="color:var(--muted);font-size:.82rem">
+        {% if pct > 5 %}Median imputation by sector + city{% else %}Mode imputation{% endif %}
       </td>
     </tr>
     {% endfor %}
@@ -63,6 +106,7 @@
 
 <!-- Numeric summary -->
 <h2>Statistical Summary — Numerical Variables</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Descriptive statistics (count, mean, std, min, quartiles, max) generated via <code>pandas .describe()</code>:</p>
 {% if stats.numeric_summary %}
 <div class="card" style="margin-top:1.5rem;overflow-x:auto">
   {{ stats.numeric_summary | safe }}
@@ -71,30 +115,30 @@
 
 <hr class="section-sep"/>
 
-<!-- Key variable distributions -->
-<h2>Variable Analysis — Key Formalization Indicators</h2>
-<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Distribution of the most important variables for informality detection (from EMICRON Module F):</p>
+<!-- Key variable analysis -->
+<h2>Variable Analysis — Key Informality Indicators</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Distribution and interpretation of the most important variables for informality detection (EMICRON Module F):</p>
 
 <div class="feat-grid" style="margin-top:1.5rem">
   <div class="feat-item" style="border-color:rgba(232,71,138,.3)">
     <div class="fi">🪪</div>
     <div>
       <strong>P1633 · Has RUT (tax ID)</strong>
-      <span>Binary: 1=Yes, 2=No. Key formal registration indicator. Nationally ~77.6% of micro-businesses have NO RUT (2024).</span>
+      <span>Binary: 1=Yes, 2=No. Key formal registration indicator. Nationally ~77.6% of micro-businesses have NO RUT (2024). Strong predictor of informality cluster.</span>
     </div>
   </div>
   <div class="feat-item" style="border-color:rgba(108,99,255,.3)">
     <div class="fi">🏛️</div>
     <div>
       <strong>P1055 · Chamber of Commerce</strong>
-      <span>Binary: 1=Yes, 2=No. In Bogotá (2023) only 27.1% of micro-businesses were registered.</span>
+      <span>Binary: 1=Yes, 2=No. In Bogotá (2023) only 27.1% of micro-businesses were registered. Strong signal of formal business identity.</span>
     </div>
   </div>
   <div class="feat-item" style="border-color:rgba(0,212,170,.3)">
     <div class="fi">🏥</div>
     <div>
       <strong>P3091 · ARL Contribution</strong>
-      <span>Occupational risk insurance contribution. 93.6% of owners made no ARL contributions in 2024 (EMICRON).</span>
+      <span>Occupational risk insurance. 93.6% of owners made no ARL contributions in 2024. Strongest single binary predictor of informality.</span>
     </div>
   </div>
   <div class="feat-item" style="border-color:rgba(255,165,0,.3)">
@@ -108,14 +152,28 @@
     <div class="fi">💰</div>
     <div>
       <strong>P3088 · Monthly Sales</strong>
-      <span>Previous month sales in COP. Continuous numeric variable. ~7% imputation rate due to non-response.</span>
+      <span>Previous month sales in COP. Continuous numeric variable. Log-normally distributed. ~7% imputation rate due to non-response bias.</span>
     </div>
   </div>
   <div class="feat-item">
     <div class="fi">🔢</div>
     <div>
       <strong>P3053 · CIIU Sector Code</strong>
-      <span>Economic activity classification (CIIU Rev. 4 AC). Covers agriculture, manufacturing, commerce, construction, transport, services.</span>
+      <span>Economic activity (CIIU Rev. 4 AC). Covers agriculture, manufacturing, commerce, construction, transport, services. Excluded: utilities, finance, air transport.</span>
+    </div>
+  </div>
+  <div class="feat-item">
+    <div class="fi">👥</div>
+    <div>
+      <strong>P3034 · Number of Workers</strong>
+      <span>Total workers including owner. Range 1–9 (EMICRON definition). Larger workforce slightly correlates with higher formalization probability.</span>
+    </div>
+  </div>
+  <div class="feat-item">
+    <div class="fi">📅</div>
+    <div>
+      <strong>P3035 · Months in Operation</strong>
+      <span>Business age in months. Older businesses show marginally higher RUT registration rates. Useful for temporal stratification of clusters.</span>
     </div>
   </div>
 </div>
@@ -140,7 +198,8 @@
 
 {% if stats.correlation %}
 <hr class="section-sep"/>
-<h2>Correlation Matrix</h2>
+<h2>Correlation Analysis</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Pearson correlation matrix for numerical variables. Values close to +1 or -1 indicate strong linear relationships. Identifying correlated features helps avoid redundancy in the clustering model:</p>
 <div class="card" style="margin-top:1.5rem;overflow-x:auto">
   {{ stats.correlation | safe }}
 </div>

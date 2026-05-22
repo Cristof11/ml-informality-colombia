@@ -15,7 +15,13 @@
 
 <hr class="section-sep"/>
 
-<!-- 4 horizontal phase cards -->
+<!-- Problem Description -->
+<h2>Problem Description</h2>
+<p style="color:var(--muted);font-size:.93rem;margin-top:.75rem;max-width:820px">Commercial informality in Colombia represents one of the most persistent structural challenges to economic development. Informal micro-businesses — those operating without legal registration, tax compliance, or social security coverage — account for the majority of employment in most Colombian cities, yet remain largely invisible to public policy instruments. Without reliable, granular data on <em>who</em> the informal traders are and <em>where</em> they concentrate, formalization programs remain generic and inefficient. This project addresses that gap by applying unsupervised machine learning (K-Means clustering) to the EMICRON 2023 dataset to automatically detect and characterize informality patterns at the city and sector level.</p>
+
+<hr class="section-sep"/>
+
+<!-- 6 horizontal phase cards -->
 <div class="phase-row c1" style="border-left:3px solid var(--accent)">
   <div class="phase-icon" style="border-color:rgba(232,71,138,.4);background:rgba(232,71,138,.08)">🎯</div>
   <div class="phase-label">
@@ -71,13 +77,44 @@
   </ul>
 </div>
 
+<!-- NEW: Risks & Limitations -->
+<div class="phase-row" style="border-left:3px solid #e84747">
+  <div class="phase-icon" style="border-color:rgba(232,71,71,.4);background:rgba(232,71,71,.08)">⚠️</div>
+  <div class="phase-label">
+    <div class="phase-num" style="color:#e84747">05 · Risks</div>
+    <h3>Risks &amp; Limitations</h3>
+  </div>
+  <ul class="diamond-list" style="--dot-color:#e84747">
+    <li><span class="dot" style="color:#e84747">◆</span><span><strong style="color:var(--white)">Algorithm sensitivity:</strong> K-Means assumes spherical, equally-sized clusters and is sensitive to outliers. High-income outliers in the sales variable (P3088) could distort cluster centroids if not properly capped or log-transformed.</span></li>
+    <li><span class="dot" style="color:#e84747">◆</span><span><strong style="color:var(--white)">Self-reported data bias:</strong> EMICRON relies on owner self-reporting. Businesses may underreport income or overreport compliance indicators, introducing systematic bias in the informality features.</span></li>
+    <li><span class="dot" style="color:#e84747">◆</span><span><strong style="color:var(--white)">Temporal gap:</strong> EMICRON 2023 data was collected throughout 2023. The informality landscape may have shifted by 2025–2026 due to economic shocks or policy changes not reflected in the dataset.</span></li>
+    <li><span class="dot" style="color:#e84747">◆</span><span><strong style="color:var(--white)">No causal inference:</strong> clustering identifies correlation patterns, not causes. A cluster of highly informal businesses in a region may reflect structural poverty, not individual choice — policy must account for this distinction.</span></li>
+    <li><span class="dot" style="color:#e84747">◆</span><span><strong style="color:var(--white)">k selection subjectivity:</strong> the number of clusters must be defined a priori. Different values of k produce different segmentations; the "optimal" k depends on both statistical criteria and business interpretability.</span></li>
+  </ul>
+</div>
+
+<!-- NEW: Expected Impact -->
+<div class="phase-row" style="border-left:3px solid var(--accent3)">
+  <div class="phase-icon" style="border-color:rgba(0,212,170,.4);background:rgba(0,212,170,.08)">🚀</div>
+  <div class="phase-label">
+    <div class="phase-num" style="color:var(--accent3)">06 · Impact</div>
+    <h3>Expected Impact</h3>
+  </div>
+  <ul class="diamond-list c3">
+    <li><span class="dot">◆</span><span><strong style="color:var(--white)">Policy targeting:</strong> municipalities can use cluster profiles to design differentiated formalization campaigns — high-cost incentives for "gateway" clusters, structural support for deeply informal segments.</span></li>
+    <li><span class="dot">◆</span><span><strong style="color:var(--white)">Resource efficiency:</strong> instead of blanket formalization drives (historically &lt;20% effective), targeted cluster-based interventions can significantly increase the formalization conversion rate per peso invested.</span></li>
+    <li><span class="dot">◆</span><span><strong style="color:var(--white)">Annual tracking:</strong> by re-running the pipeline on each new EMICRON release, Colombia can monitor whether specific informality clusters are shrinking — creating a measurable KPI for public policy evaluation.</span></li>
+    <li><span class="dot">◆</span><span><strong style="color:var(--white)">Academic contribution:</strong> this project demonstrates a replicable CRISP-ML framework for applying unsupervised ML to labor informality data, applicable to other Latin American countries with similar survey infrastructure (ENAHO in Peru, ENOE in Mexico).</span></li>
+  </ul>
+</div>
+
 <hr class="section-sep"/>
-<h2>Why This Problem Matters</h2>
+<h2>Real-World Justification</h2>
 <div class="two-col" style="margin-top:1.5rem">
   <div>
     <p style="color:var(--muted);font-size:.93rem">Cities with the <strong style="color:var(--white)">highest informality rates</strong> (GEIH, 2023): Sincelejo (70%), Riohacha (63.9%), Valledupar (63.3%). Lowest: Bogotá (32.9%), Manizales (34.2%), Medellín (37%). This 37-point spread shows informality is highly localized — exactly the pattern K-Means clustering can detect.</p>
     <br>
-    <p style="color:var(--muted);font-size:.93rem">Meanwhile, <strong style="color:var(--accent)">93.6% of micro-business owners</strong> made no ARL contributions in 2024, leaving millions of workers completely without occupational risk protection.</p>
+    <p style="color:var(--muted);font-size:.93rem">Meanwhile, <strong style="color:var(--accent)">93.6% of micro-business owners</strong> made no ARL contributions in 2024, leaving millions of workers completely without occupational risk protection. Ley 2069 of 2020 mandates DANE to build a national informality information system (SIECI) — this project contributes directly to that legal mandate.</p>
   </div>
   <div style="display:flex;flex-direction:column;gap:1rem">
     <div class="info-box">
@@ -87,6 +124,10 @@
     <div class="info-box">
       <h4>🎓 Stakeholders</h4>
       <p>Municipal governments, MinCIT, Chambers of Commerce, DNP (Departamento Nacional de Planeación), academic researchers in labor economics and public policy.</p>
+    </div>
+    <div class="info-box">
+      <h4>⚖️ Legal Framework</h4>
+      <p>Ley 905 de 2004, CONPES 3956 (Política de Formalización Empresarial), and Ley 2069 de 2020 all mandate systematic measurement and reduction of commercial informality — this project directly supports those objectives.</p>
     </div>
   </div>
 </div>

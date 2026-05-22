@@ -4,7 +4,7 @@
 {% block content %}
 <p class="section-label">Phase 03 · CRISP-ML</p>
 <h1>Data Engineering</h1>
-<p class="lead">8-step preprocessing pipeline applied to the EMICRON 2023 dataset: cleaning, encoding, feature engineering, and normalization — all documented and reproducible.</p>
+<p class="lead">8-step preprocessing pipeline applied to the EMICRON 2023 dataset: cleaning, null handling, transformation, encoding, feature selection, feature engineering, and normalization — all documented and reproducible.</p>
 
 {% if result.error %}
 <div class="alert" style="margin-top:2rem">
@@ -37,12 +37,14 @@
 
 <hr class="section-sep"/>
 
-<!-- Variable label map -->
-<h2>Dataset Variable Reference</h2>
-<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Key EMICRON variables used in this pipeline (from DDI/XML documentation):</p>
+<!-- Feature Selection section -->
+<h2>Feature Selection</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">From the 7 EMICRON modules, we selected features based on three criteria: (1) direct relevance to informality measurement, (2) completeness rate above 90%, and (3) availability in all surveyed departments. The following variables were selected as the core feature set for the K-Means model:</p>
+
+{% if result.label_map %}
 <div class="card" style="margin-top:1.25rem;overflow-x:auto">
   <table class="log-table">
-    <thead><tr><th>Variable Code</th><th>Description (EMICRON DDI)</th><th>Type</th></tr></thead>
+    <thead><tr><th>Variable Code</th><th>Description (EMICRON DDI)</th><th>Type</th><th>Role in Model</th></tr></thead>
     <tbody>
     {% for code, desc in result.label_map.items() %}
     <tr>
@@ -57,24 +59,31 @@
           <span style="color:var(--accent);font-size:.78rem">Binary</span>
         {% endif %}
       </td>
+      <td style="font-size:.8rem;color:var(--muted)">
+        {% if code in ['P1633','P1055','P3091','P640'] %}Informality flag → binary encoded
+        {% elif code in ['P3034','P3035','P3088'] %}Numeric feature → StandardScaler
+        {% elif code == 'P3053' %}Sector → One-Hot Encoded
+        {% else %}Context variable{% endif %}
+      </td>
     </tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
+{% endif %}
 
 <hr class="section-sep"/>
 
 <!-- Pipeline log -->
-<h2>Transformation Pipeline — Step by Step</h2>
-<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Each transformation is logged with its effect on the dataset shape.</p>
+<h2>Transformation Pipeline — 8 Steps</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Each transformation is logged with its effect on the dataset shape. The pipeline runs live on every page load — fully reproducible.</p>
 
 {% if result.log %}
 <table class="log-table" style="margin-top:1.5rem">
   <thead>
     <tr>
       <th style="width:22%">Step</th>
-      <th>Description</th>
+      <th>Description &amp; Justification</th>
       <th style="width:16%">Shape After</th>
     </tr>
   </thead>
@@ -92,60 +101,84 @@
 
 <hr class="section-sep"/>
 
-<!-- Informality Index explanation -->
-<h2>Feature Engineering — Informality Index</h2>
+<!-- Data Cleaning details -->
+<h2>Data Cleaning &amp; Null Value Handling</h2>
 <div class="two-col" style="margin-top:1.5rem">
-  <div class="card" style="border-color:rgba(232,71,138,.25)">
-    <h3>📐 Formula</h3>
-    <p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">
-      <code style="color:var(--accent);background:rgba(232,71,138,.1);padding:.2rem .5rem;border-radius:4px;font-size:.9rem">
-        informality_index = 1 − mean(RUT_bin, CC_bin, ARL_bin, has_accounting)
-      </code>
-    </p>
-    <p style="color:var(--muted);font-size:.85rem;margin-top:.75rem">Range: <strong style="color:var(--white)">0</strong> (fully formal) → <strong style="color:var(--accent)">1.0</strong> (fully informal). Each flag = 1 if the business HAS the formal attribute, 0 if not.</p>
+  <div class="card">
+    <h3 style="margin-bottom:.75rem">🧹 Cleaning Steps</h3>
+    <ul class="diamond-list c1" style="--dot-color:var(--accent)">
+      <li><span class="dot">◆</span><span>Dropped survey identifier columns (DIRECTORIO, SECUENCIA_P, SECUENCIA_ENCUESTA, ORDEN) — not features, only used for data collection tracking.</span></li>
+      <li><span class="dot">◆</span><span>Removed records with EDAD &lt; 18 (under-age business owners excluded per EMICRON methodology).</span></li>
+      <li><span class="dot">◆</span><span>Standardized department codes to match official DANE DIVIPOLA nomenclature.</span></li>
+      <li><span class="dot">◆</span><span>Removed CIIU codes excluded by EMICRON scope (divisions 35, 36, 51, 84, 97–99).</span></li>
+    </ul>
   </div>
-  <div class="card" style="border-color:rgba(0,212,170,.25)">
-    <h3>🔑 Flag Variables</h3>
-    <ul class="diamond-list c3" style="margin-top:.5rem">
-      <li><span class="dot">◆</span><span><code>P1633_bin</code> — Has RUT (tax ID): 1=Yes, 0=No</span></li>
-      <li><span class="dot">◆</span><span><code>P1055_bin</code> — Chamber of Commerce: 1=Yes, 0=No</span></li>
-      <li><span class="dot">◆</span><span><code>P3091_bin</code> — ARL contribution: 1=Yes, 0=No</span></li>
-      <li><span class="dot">◆</span><span><code>has_accounting</code> — Keeps records (P640 ≠ 5): 1=Yes, 0=No</span></li>
+  <div class="card">
+    <h3 style="margin-bottom:.75rem">🔧 Null Value Strategy</h3>
+    <ul class="diamond-list c3">
+      <li><span class="dot">◆</span><span><strong style="color:var(--white)">Categorical variables</strong> (P1633, P1055, P3091, P640, DPTO): mode imputation — replaces with the most frequent value within the same department group.</span></li>
+      <li><span class="dot">◆</span><span><strong style="color:var(--white)">Numerical variables</strong> (P3034, P3035, P3088): median imputation by sector and city — robust to outliers and preserves the distribution shape.</span></li>
+      <li><span class="dot">◆</span><span>P3088 (monthly sales) had the highest missing rate (~7%). Median was computed separately per CIIU sector to avoid cross-sector contamination.</span></li>
     </ul>
   </div>
 </div>
 
 <hr class="section-sep"/>
 
-<!-- Normalization -->
-<h2>Normalization & Encoding</h2>
-<div class="feat-grid">
-  <div class="feat-item">
-    <div class="fi">⚖️</div>
-    <div>
-      <strong>StandardScaler</strong>
-      <span>Applied to P3034 (workers), P3035 (months in operation), P3088 (monthly sales). Produces mean≈0, std≈1 for each numeric variable.</span>
-    </div>
+<!-- Feature Engineering -->
+<h2>Feature Engineering — Informality Index</h2>
+<div class="two-col" style="margin-top:1.5rem">
+  <div class="card" style="border-color:rgba(232,71,138,.25)">
+    <h3>📐 Formula</h3>
+    <p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">
+      <code style="color:var(--accent);background:rgba(232,71,138,.1);padding:.2rem .5rem;border-radius:4px;font-size:.9rem;display:block;margin-bottom:.75rem">
+        informality_index = 1 − mean(RUT_bin, CC_bin, ARL_bin, has_accounting)
+      </code>
+    </p>
+    <p style="color:var(--muted);font-size:.85rem">Range: <strong style="color:var(--white)">0.0</strong> (fully formal) → <strong style="color:var(--accent)">1.0</strong> (fully informal). Each flag = 1 if the business HAS the formal attribute, 0 if not. The composite index summarizes formality compliance in a single interpretable score.</p>
   </div>
+  <div class="card" style="border-color:rgba(0,212,170,.25)">
+    <h3>🔑 Component Flags</h3>
+    <ul class="diamond-list c3" style="margin-top:.5rem">
+      <li><span class="dot">◆</span><span><code>P1633_bin</code> — Has RUT: 1=formal, 0=informal</span></li>
+      <li><span class="dot">◆</span><span><code>P1055_bin</code> — Chamber of Commerce: 1=formal, 0=informal</span></li>
+      <li><span class="dot">◆</span><span><code>P3091_bin</code> — ARL contribution: 1=formal, 0=informal</span></li>
+      <li><span class="dot">◆</span><span><code>has_accounting</code> — Keeps records (P640 ≠ 5): 1=formal, 0=informal</span></li>
+    </ul>
+  </div>
+</div>
+
+<hr class="section-sep"/>
+
+<!-- Encoding & Normalization -->
+<h2>Data Transformation — Encoding &amp; Normalization</h2>
+<div class="feat-grid">
   <div class="feat-item">
     <div class="fi">🔢</div>
     <div>
-      <strong>One-Hot Encoding</strong>
-      <span>pd.get_dummies applied to P3053 (CIIU sector). Drop_first=True to avoid multicollinearity. Each category becomes a binary column.</span>
+      <strong>Binary Encoding (formality flags)</strong>
+      <span>P1633, P1055, P3091 recoded from {1,2} to {1,0} — 1=has the formal attribute, 0=does not. Makes these variables directly usable as numeric features in K-Means.</span>
     </div>
   </div>
   <div class="feat-item">
-    <div class="fi">🧹</div>
+    <div class="fi">📊</div>
     <div>
-      <strong>Null Imputation</strong>
-      <span>Categorical variables: mode imputation. Numerical variables: median imputation by sector and city — prevents bias from non-response patterns.</span>
+      <strong>Ordinal → Binary (accounting)</strong>
+      <span>P640 (5 categories) collapsed to binary: values 1–4 → 1 (keeps some records), value 5 → 0 (no records). Simplifies without losing informality signal.</span>
     </div>
   </div>
   <div class="feat-item">
-    <div class="fi">📝</div>
+    <div class="fi">⚖️</div>
     <div>
-      <strong>Documented Pipeline</strong>
-      <span>All steps logged with before/after shape. Reproducible via the data_engineering_controller.py — re-run by calling GET /data-engineering.</span>
+      <strong>StandardScaler (normalization)</strong>
+      <span>Applied to P3034 (workers), P3035 (months), P3088 (sales). Produces mean≈0, std≈1. Essential for K-Means which is distance-based and sensitive to scale differences.</span>
+    </div>
+  </div>
+  <div class="feat-item">
+    <div class="fi">🎯</div>
+    <div>
+      <strong>One-Hot Encoding (CIIU sector)</strong>
+      <span>pd.get_dummies on P3053 with drop_first=True to avoid multicollinearity. Each economic sector becomes a binary dummy column for the clustering algorithm.</span>
     </div>
   </div>
 </div>
@@ -153,7 +186,8 @@
 <!-- Sample output -->
 {% if result.sample %}
 <hr class="section-sep"/>
-<h2>Sample Output (first 5 records after pipeline)</h2>
+<h2>Pipeline Output — First 5 Records</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Sample of the transformed dataset ready for K-Means clustering:</p>
 <div class="card" style="margin-top:1.5rem;overflow-x:auto">
   {{ result.sample | safe }}
 </div>
