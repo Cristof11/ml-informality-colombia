@@ -1,0 +1,197 @@
+{
+  "kmeans": {
+    "k": 4,
+    "silhouette": 0.487,
+    "n_records": 81021,
+    "profiles": [
+      {
+        "CLUSTER": 0,
+        "records": 63974,
+        "inf_mean": 0.893,
+        "no_rut": 85.4,
+        "no_cc": 100.0,
+        "no_arl": 96.7,
+        "med_sales": 1200000.0,
+        "name": "Deeply Informal"
+      },
+      {
+        "CLUSTER": 1,
+        "records": 9937,
+        "inf_mean": 0.251,
+        "no_rut": 2.8,
+        "no_cc": 15.8,
+        "no_arl": 70.7,
+        "med_sales": 3850000.0,
+        "name": "Near-Formal"
+      },
+      {
+        "CLUSTER": 2,
+        "records": 3783,
+        "inf_mean": 0.903,
+        "no_rut": 90.6,
+        "no_cc": 98.5,
+        "no_arl": 98.5,
+        "med_sales": 900000.0,
+        "name": "Fully Informal"
+      },
+      {
+        "CLUSTER": 3,
+        "records": 3327,
+        "inf_mean": 0.859,
+        "no_rut": 82.3,
+        "no_cc": 95.0,
+        "no_arl": 94.7,
+        "med_sales": 0.0,
+        "name": "Borderline Informal"
+      }
+    ]
+  },
+  "logistic": {
+    "accuracy": 100.0,
+    "f1": 100.0,
+    "report": {
+      "Formal": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 3094.0
+      },
+      "Informal": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 13111.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 16205.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 16205.0
+      }
+    },
+    "train_size": 64816,
+    "test_size": 16205,
+    "params": {
+      "C": 1.0,
+      "max_iter": 500,
+      "solver": "lbfgs",
+      "class_weight": "balanced"
+    }
+  },
+  "random_forest": {
+    "accuracy": 100.0,
+    "f1": 100.0,
+    "report": {
+      "Formal": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 3094.0
+      },
+      "Informal": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 13111.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 16205.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 16205.0
+      }
+    },
+    "train_size": 64816,
+    "test_size": 16205,
+    "params": {
+      "n_estimators": 100,
+      "max_depth": 8,
+      "class_weight": "balanced"
+    },
+    "feature_importance": [
+      [
+        "RUT_bin",
+        0.418995716291569
+      ],
+      [
+        "ACC_bin",
+        0.27306113352912825
+      ],
+      [
+        "CC_bin",
+        0.1404404373067531
+      ],
+      [
+        "ARL_bin",
+        0.06992334591065379
+      ],
+      [
+        "MONTHS_OPERATING",
+        0.048156767088018596
+      ],
+      [
+        "MONTHLY_SALES",
+        0.033350267439209845
+      ],
+      [
+        "CIIU_SECTOR",
+        0.01535006540254562
+      ],
+      [
+        "WORKERS",
+        0.0007222670321216921
+      ]
+    ]
+  },
+  "predictions": {
+    "formal": {
+      "lr": 0,
+      "rf": 0,
+      "lr_prob": 0.0,
+      "rf_prob": 0.0
+    },
+    "informal": {
+      "lr": 1,
+      "rf": 1,
+      "lr_prob": 100.0,
+      "rf_prob": 100.0
+    },
+    "gateway": {
+      "lr": 1,
+      "rf": 1,
+      "lr_prob": 100.0,
+      "rf_prob": 92.2
+    }
+  },
+  "dataset": {
+    "total": 81021,
+    "train": 64816,
+    "test": 16205,
+    "features": [
+      "RUT_bin",
+      "CC_bin",
+      "ACC_bin",
+      "ARL_bin",
+      "WORKERS",
+      "MONTHS_OPERATING",
+      "MONTHLY_SALES",
+      "CIIU_SECTOR"
+    ],
+    "target": "INFORMALITY_INDEX >= 0.75",
+    "informal_pct": 80.9
+  }
+}
