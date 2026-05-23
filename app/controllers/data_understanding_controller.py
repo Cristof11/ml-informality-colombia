@@ -1,16 +1,13 @@
 from flask import Blueprint, render_template
 import pandas as pd
 import os
-import json
 
 data_understanding_bp = Blueprint('data_understanding', __name__)
-
 DATA_PATH = os.path.join(os.path.dirname(__file__), '../../data/emicron_sample.csv')
 
 def load_data():
     try:
-        df = pd.read_csv(DATA_PATH)
-        return df
+        return pd.read_csv(DATA_PATH)
     except Exception:
         return None
 
@@ -18,12 +15,10 @@ def load_data():
 def data_understanding():
     df = load_data()
     stats = {}
-
     if df is not None:
-        # Basic shape
-        stats['n_records'] = df.shape[0]
+        stats['n_records']  = f"{df.shape[0]:,}"
         stats['n_variables'] = df.shape[1]
-        stats['columns'] = list(df.columns)
+        stats['columns']    = list(df.columns)
 
         # Missing values
         missing = df.isnull().sum()
@@ -32,30 +27,33 @@ def data_understanding():
 
         # Numeric summary
         num_cols = df.select_dtypes(include='number').columns.tolist()
-        if num_cols:
-            desc = df[num_cols].describe().round(2)
-            stats['numeric_summary'] = desc.to_html(
+        display_num = ['WORKERS','MONTHS_OPERATING','MONTHLY_SALES','INFORMALITY_INDEX']
+        display_num = [c for c in display_num if c in df.columns]
+        if display_num:
+            stats['numeric_summary'] = df[display_num].describe().round(2).to_html(
                 classes='table table-sm', border=0)
 
-        # Categorical distributions - key variables
+        # Categorical distributions
         cat_stats = {}
-        key_cats = ['P1633', 'P1055', 'P3091', 'P640', 'DPTO']
-        for col in key_cats:
+        for col in ['RUT','CAMARA_COMERCIO','ACCOUNTING','CIIU_LABEL','DEPT_NAME']:
             if col in df.columns:
-                vc = df[col].value_counts(dropna=False).head(6)
+                vc = df[col].value_counts(dropna=False).head(8)
                 cat_stats[col] = vc.to_dict()
         stats['cat_stats'] = cat_stats
 
-        # Correlation matrix (numeric only, top 8 cols)
-        if len(num_cols) >= 2:
-            corr = df[num_cols[:8]].corr().round(2)
-            stats['correlation'] = corr.to_html(
+        # Correlation
+        corr_cols = [c for c in display_num if c in df.columns]
+        if len(corr_cols) >= 2:
+            stats['correlation'] = df[corr_cols].corr().round(3).to_html(
                 classes='table table-sm corr-table', border=0)
+
+        # Informality summary
+        stats['inf_mean']      = round(df['INFORMALITY_INDEX'].mean(), 3) if 'INFORMALITY_INDEX' in df.columns else 'N/A'
+        stats['no_rut_pct']    = round((df['RUT']==2).mean()*100, 1) if 'RUT' in df.columns else 'N/A'
+        stats['no_cc_pct']     = round((df['CAMARA_COMERCIO']==2).mean()*100, 1) if 'CAMARA_COMERCIO' in df.columns else 'N/A'
+        stats['no_acc_pct']    = round((df['ACCOUNTING']==5).mean()*100, 1) if 'ACCOUNTING' in df.columns else 'N/A'
+        stats['median_sales']  = f"COP {int(df['MONTHLY_SALES'].median()):,}" if 'MONTHLY_SALES' in df.columns else 'N/A'
     else:
-        stats['error'] = (
-            'Dataset not found. Please place emicron_sample.csv '
-            'in the /data folder. Download from: '
-            'https://microdatos.dane.gov.co/index.php/catalog/832'
-        )
+        stats['error'] = 'Dataset not found. Place emicron_sample.csv in /data folder.'
 
     return render_template('data_understanding.html', stats=stats)
