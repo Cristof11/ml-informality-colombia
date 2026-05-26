@@ -7,6 +7,68 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <style>
+    /* ── Dropdown submenu ── */
+    .nav-dropdown { position: relative; }
+
+    .nav-dropdown > a::after {
+      content: ' ▾';
+      font-size: .65rem;
+      opacity: .7;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 220px;
+      background: rgba(20,24,40,.97);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: .5rem 0;
+      box-shadow: 0 12px 40px rgba(0,0,0,.4);
+      backdrop-filter: blur(18px);
+      z-index: 200;
+    }
+
+    .nav-dropdown:hover .dropdown-menu,
+    .nav-dropdown:focus-within .dropdown-menu { display: block; }
+
+    .dropdown-menu a {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .55rem 1.1rem;
+      color: var(--muted);
+      font-size: .85rem;
+      font-weight: 500;
+      text-decoration: none;
+      border-radius: 0;
+      transition: background .15s, color .15s;
+      white-space: nowrap;
+    }
+
+    .dropdown-menu a:hover { background: rgba(255,255,255,.06); color: var(--white); }
+
+    .dropdown-menu .drop-divider {
+      height: 1px;
+      background: var(--border);
+      margin: .35rem .75rem;
+    }
+
+    .drop-badge {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: .15rem .45rem;
+      border-radius: 5px;
+      background: rgba(108,99,255,.2);
+      color: var(--accent2);
+      margin-left: auto;
+    }
+  </style>
 </head>
 <body>
 
@@ -18,7 +80,19 @@
     <li><a href="/business-understanding">Business</a></li>
     <li><a href="/data-understanding">Data Understanding</a></li>
     <li><a href="/data-engineering">Data Engineering</a></li>
-    <li><a href="/model-engineering" style="color:var(--accent);font-weight:600">Model Engineering</a></li>
+    <li class="nav-dropdown">
+      <a href="/model-engineering" style="color:var(--accent);font-weight:600">Model Engineering</a>
+      <div class="dropdown-menu">
+        <a href="/model-engineering#intro">📋 Phase 04 · CRISP-ML <span class="drop-badge">Active</span></a>
+        <div class="drop-divider"></div>
+        <a href="/model-engineering#kmeans">🔵 Model 01 · Unsupervised</a>
+        <a href="/model-engineering#logistic">🟣 Model 02 · Supervised</a>
+        <a href="/model-engineering#rf">🟢 Model 03 · Ensemble</a>
+        <div class="drop-divider"></div>
+        <a href="/model-engineering#comparison">📊 Comparison</a>
+        <a href="/model-engineering#predictions">💻 Predictions</a>
+      </div>
+    </li>
   </ul>
 </nav>
 

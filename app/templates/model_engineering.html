@@ -2,7 +2,7 @@
 {% block title %}Model Engineering{% endblock %}
 
 {% block content %}
-<p class="section-label">Phase 04 · CRISP-ML</p>
+<p class="section-label" id="intro">Phase 04 · CRISP-ML</p>
 <h1>Model Engineering</h1>
 <p class="lead">Three Machine Learning models trained on <strong style="color:var(--white)">81,021 real EMICRON 2023 records</strong> to detect and classify commercial informality patterns in Colombian cities.</p>
 
@@ -45,7 +45,7 @@
 <!-- ═══════════════════════════════════════
      MODEL 1: K-MEANS CLUSTERING
 ════════════════════════════════════════ -->
-<p class="section-label">Model 01 · Unsupervised</p>
+<p class="section-label" id="kmeans">Model 01 · Unsupervised</p>
 <h2>K-Means Clustering</h2>
 <p style="color:var(--muted);font-size:.93rem;margin-top:.5rem;max-width:820px">K-Means is an unsupervised algorithm that groups data points into k clusters by minimizing within-cluster variance (inertia). It requires no labeled data — ideal for discovering hidden informality patterns in EMICRON without predefined categories. Applied to all 81,021 records.</p>
 
@@ -120,7 +120,7 @@
 <!-- ═══════════════════════════════════════
      MODEL 2: LOGISTIC REGRESSION
 ════════════════════════════════════════ -->
-<p class="section-label">Model 02 · Supervised Classification</p>
+<p class="section-label" id="logistic">Model 02 · Supervised Classification</p>
 <h2>Logistic Regression</h2>
 <p style="color:var(--muted);font-size:.93rem;margin-top:.5rem;max-width:820px">Logistic Regression models the probability of a binary outcome using a linear combination of features passed through a sigmoid function. It is interpretable, fast, and serves as a baseline supervised model to classify micro-businesses as high-informality (1) or lower-informality (0).</p>
 
@@ -184,7 +184,7 @@
 <!-- ═══════════════════════════════════════
      MODEL 3: RANDOM FOREST
 ════════════════════════════════════════ -->
-<p class="section-label">Model 03 · Ensemble Learning</p>
+<p class="section-label" id="rf">Model 03 · Ensemble Learning</p>
 <h2>Random Forest Classifier</h2>
 <p style="color:var(--muted);font-size:.93rem;margin-top:.5rem;max-width:820px">Random Forest builds multiple decision trees on random subsets of data and features, then aggregates their predictions (majority vote). It handles non-linear relationships, is robust to outliers, and provides feature importance scores — ideal for understanding which variables drive informality classification.</p>
 
@@ -259,7 +259,7 @@
 <!-- ═══════════════════════════════════════
      MODEL COMPARISON
 ════════════════════════════════════════ -->
-<p class="section-label">Comparison</p>
+<p class="section-label" id="comparison">Comparison</p>
 <h2>Model Comparison Table</h2>
 
 <div class="card" style="margin-top:1.5rem;overflow-x:auto">
@@ -312,7 +312,7 @@
 <!-- ═══════════════════════════════════════
      PREDICTION EXAMPLES
 ════════════════════════════════════════ -->
-<p class="section-label">Predictions</p>
+<p class="section-label" id="predictions">Predictions</p>
 <h2>Console Prediction Examples</h2>
 <p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Three example micro-businesses with different profiles — predictions from both supervised models:</p>
 
