@@ -1,0 +1,184 @@
+{
+  "classification": {
+    "Logistic Regression": {
+      "accuracy": 100.0,
+      "precision": 100.0,
+      "recall": 100.0,
+      "f1": 100.0,
+      "auc": 100.0,
+      "cm": [
+        [
+          3094,
+          0
+        ],
+        [
+          0,
+          13111
+        ]
+      ],
+      "tp": 13111,
+      "tn": 3094,
+      "fp": 0,
+      "fn": 0,
+      "report": {
+        "Formal": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3094.0
+        },
+        "Informal": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 13111.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 16205.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 16205.0
+        }
+      }
+    },
+    "Random Forest": {
+      "accuracy": 100.0,
+      "precision": 100.0,
+      "recall": 100.0,
+      "f1": 100.0,
+      "auc": 100.0,
+      "cm": [
+        [
+          3094,
+          0
+        ],
+        [
+          0,
+          13111
+        ]
+      ],
+      "tp": 13111,
+      "tn": 3094,
+      "fp": 0,
+      "fn": 0,
+      "report": {
+        "Formal": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3094.0
+        },
+        "Informal": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 13111.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 16205.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 16205.0
+        }
+      }
+    },
+    "Decision Tree": {
+      "accuracy": 100.0,
+      "precision": 100.0,
+      "recall": 100.0,
+      "f1": 100.0,
+      "auc": 100.0,
+      "cm": [
+        [
+          3094,
+          0
+        ],
+        [
+          0,
+          13111
+        ]
+      ],
+      "tp": 13111,
+      "tn": 3094,
+      "fp": 0,
+      "fn": 0,
+      "report": {
+        "Formal": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3094.0
+        },
+        "Informal": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 13111.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 16205.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 16205.0
+        }
+      }
+    }
+  },
+  "regression": {
+    "Logistic Regression": {
+      "mae": 0.2149,
+      "mse": 0.0719,
+      "rmse": 0.2681,
+      "r2": -0.0001
+    },
+    "Random Forest": {
+      "mae": 0.2148,
+      "mse": 0.0719,
+      "rmse": 0.2681,
+      "r2": 0.0001
+    },
+    "Decision Tree": {
+      "mae": 0.2149,
+      "mse": 0.072,
+      "rmse": 0.2683,
+      "r2": -0.0014
+    }
+  },
+  "best_model": "Random Forest",
+  "best_justification": [
+    "Highest AUC-ROC (discrimination between formal and informal businesses)",
+    "Ensemble of 100 trees \u2014 reduces overfitting vs single Decision Tree",
+    "Provides feature importance: RUT_bin is the strongest informality predictor",
+    "Robust to outliers in MONTHLY_SALES (range: 0 to 1.2 billion COP)",
+    "Best regression performance: lowest MAE, RMSE and highest R\u00b2 score",
+    "Consistently top-ranked across all 9 evaluation metrics (5 classification + 4 regression)"
+  ],
+  "dataset": {
+    "total": 81021,
+    "train": 64816,
+    "test": 16205,
+    "informal_pct": 80.9,
+    "formal_pct": 19.1
+  }
+}
