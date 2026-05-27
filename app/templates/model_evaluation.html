@@ -266,7 +266,7 @@
       ('MONTHS_OPERATING','Business age — older firms more likely to be formally registered'),
       ('CIIU_SECTOR','Economic sector — informality rates vary significantly by activity'),
     ] %}
-    {% for i, (feat, interp) in enumerate(feature_info) %}
+    {% for feat, interp in feature_info %}{% set i = loop.index0 %}
     <tr>
       <td style="color:var(--muted)">{{ i+1 }}</td>
       <td><code style="color:var(--accent2)">{{ feat }}</code></td>
@@ -318,7 +318,7 @@
 
   <h3 style="margin-bottom:.85rem">Justification for Selection</h3>
   <div style="display:flex;flex-direction:column;gap:.6rem">
-    {% for i, reason in enumerate(data.best_justification) %}
+    {% for reason in data.best_justification %}{% set i = loop.index %}
     <div style="display:flex;gap:.75rem;align-items:flex-start">
       <span style="color:var(--accent3);font-weight:700;min-width:1.5rem">{{ i+1 }}.</span>
       <p style="color:var(--muted);font-size:.88rem;margin:0">{{ reason }}</p>
