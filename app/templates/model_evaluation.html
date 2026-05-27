@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+{% block title %}Model Evaluation{% endblock %}
+
+{% block content %}
+<p class="section-label" id="eval-top">Phase 05 · CRISP-ML</p>
+<h1>Model Evaluation</h1>
+<p class="lead">Comprehensive evaluation of three Machine Learning models trained on <strong style="color:var(--white)">81,021 real EMICRON 2023 records</strong> — covering classification metrics, regression metrics, ROC curves, confusion matrices, and best model selection.</p>
+
+{% if data.error %}
+<div class="card" style="border-color:var(--accent)"><p style="color:var(--accent)">⚠️ Error: {{ data.error }}</p></div>
+{% else %}
+
+<!-- Dataset summary -->
+<div class="stat-grid" style="margin-top:2rem">
+  <div class="stat-card"><div class="stat-num">{{ data.dataset.total }}</div><div class="stat-label">Total Records</div></div>
+  <div class="stat-card"><div class="stat-num">{{ data.dataset.train }}</div><div class="stat-label">Training Set (80%)</div></div>
+  <div class="stat-card"><div class="stat-num">{{ data.dataset.test }}</div><div class="stat-label">Test Set (20%)</div></div>
+  <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Models Evaluated</div></div>
+</div>
+
+<hr class="section-sep"/>
+
+<!-- ════════════════════════════════════════════════════
+     CLASSIFICATION METRICS
+════════════════════════════════════════════════════ -->
+<p class="section-label" id="classification">Classification Metrics</p>
+<h2>Classification Performance Dashboard</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem;max-width:820px">All metrics computed on the held-out test set ({{ data.dataset.test }} records). Binary target: <code style="color:var(--accent)">INFORMALITY_INDEX ≥ 0.75 → Informal (1)</code>, otherwise Formal (0). Class balance: {{ data.dataset.informal_pct }}% informal / {{ data.dataset.formal_pct }}% formal.</p>
+
+{% set model_colors = {
+  'Logistic Regression': 'var(--accent)',
+  'Random Forest':       'var(--accent3)',
+  'Decision Tree':       'var(--accent2)'
+} %}
+
+<!-- Metric comparison table -->
+<div class="card" style="margin-top:1.5rem;overflow-x:auto">
+  <table class="log-table">
+    <thead>
+      <tr>
+        <th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>AUC-ROC</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for name, m in data.classification.items() %}
+    <tr>
+      <td style="font-weight:700;color:{{ model_colors.get(name,'var(--white)') }}">{{ name }}</td>
+      <td><strong style="color:var(--accent3)">{{ m.accuracy }}%</strong></td>
+      <td>{{ m.precision }}%</td>
+      <td>{{ m.recall }}%</td>
+      <td>{{ m.f1 }}%</td>
+      <td style="color:var(--accent2)">{{ m.auc }}%</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Metric definitions -->
+<div class="two-col" style="margin-top:1.5rem">
+  <div class="info-box">
+    <h4>📐 Metric Definitions</h4>
+    <p style="font-size:.85rem;color:var(--muted)">
+      <strong style="color:var(--white)">Accuracy:</strong> Overall % of correct predictions.<br>
+      <strong style="color:var(--white)">Precision:</strong> Of predicted informal, how many truly are.<br>
+      <strong style="color:var(--white)">Recall:</strong> Of actual informal businesses, how many detected.<br>
+      <strong style="color:var(--white)">F1-Score:</strong> Harmonic mean of Precision and Recall.<br>
+      <strong style="color:var(--white)">AUC-ROC:</strong> Discrimination ability across all thresholds.
+    </p>
+  </div>
+  <div class="info-box">
+    <h4>⚙️ Evaluation Setup</h4>
+    <p style="font-size:.85rem;color:var(--muted)">
+      <strong style="color:var(--white)">Split:</strong> 80/20 stratified train-test split.<br>
+      <strong style="color:var(--white)">class_weight=balanced</strong> applied to handle imbalance.<br>
+      <strong style="color:var(--white)">Threshold:</strong> 0.5 default for binary predictions.<br>
+      <strong style="color:var(--white)">random_state=42</strong> for full reproducibility.
+    </p>
+  </div>
+</div>
+
+<!-- Metric bar chart -->
+<div class="card" style="margin-top:1.5rem;padding:1.25rem;text-align:center">
+  <p style="color:var(--muted);font-size:.82rem;margin-bottom:.75rem">Accuracy · Precision · Recall · F1-Score · AUC-ROC — all three models compared</p>
+  <img src="{{ url_for('static', filename='img/eval_metrics_bar.png') }}" style="width:100%;border-radius:8px" alt="Classification Metrics Bar Chart">
+</div>
+
+<div class="two-col" style="margin-top:1.25rem">
+  <div class="card" style="padding:1.25rem;text-align:center">
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:.75rem">Radar — multi-dimensional performance profile</p>
+    <img src="{{ url_for('static', filename='img/eval_radar.png') }}" style="width:100%;border-radius:8px" alt="Radar Chart">
+  </div>
+  <div class="card" style="padding:1.25rem;text-align:center">
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:.75rem">ROC Curves with AUC — all three models</p>
+    <img src="{{ url_for('static', filename='img/eval_roc.png') }}" style="width:100%;border-radius:8px" alt="ROC Curves">
+  </div>
+</div>
+
+<hr class="section-sep"/>
+
+<!-- ════════════════════════════════════════════════════
+     CONFUSION MATRICES
+════════════════════════════════════════════════════ -->
+<p class="section-label" id="confusion">Confusion Matrices</p>
+<h2>Confusion Matrix Analysis</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem">Each matrix shows the distribution of correct and incorrect predictions — True/False Positives and Negatives on the {{ data.dataset.test }} test records.</p>
+
+<div class="card" style="margin-top:1.5rem;padding:1.25rem;text-align:center">
+  <img src="{{ url_for('static', filename='img/eval_confusion_all.png') }}" style="width:100%;border-radius:8px" alt="Confusion Matrices">
+</div>
+
+<!-- TP/TN/FP/FN table per model -->
+<div class="card" style="margin-top:1.25rem;overflow-x:auto">
+  <table class="log-table">
+    <thead>
+      <tr><th>Model</th><th>True Positives (TP)</th><th>True Negatives (TN)</th><th>False Positives (FP)</th><th>False Negatives (FN)</th></tr>
+    </thead>
+    <tbody>
+    {% for name, m in data.classification.items() %}
+    <tr>
+      <td style="font-weight:700;color:{{ model_colors.get(name,'var(--white)') }}">{{ name }}</td>
+      <td style="color:var(--accent3)">{{ m.tp }}</td>
+      <td style="color:var(--accent3)">{{ m.tn }}</td>
+      <td style="color:var(--accent)">{{ m.fp }}</td>
+      <td style="color:var(--accent)">{{ m.fn }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="two-col" style="margin-top:1.25rem">
+  <div class="info-box" style="border-color:rgba(0,212,170,.25)">
+    <h4>✅ True Positive / True Negative</h4>
+    <p style="font-size:.85rem;color:var(--muted)"><strong style="color:var(--white)">TP:</strong> Business correctly classified as Informal — model detected real informality.<br><strong style="color:var(--white)">TN:</strong> Business correctly classified as Formal — model confirmed formality correctly.</p>
+  </div>
+  <div class="info-box" style="border-color:rgba(232,71,138,.25)">
+    <h4>❌ False Positive / False Negative</h4>
+    <p style="font-size:.85rem;color:var(--muted)"><strong style="color:var(--white)">FP:</strong> Predicted Informal but actually Formal — Type I error (false alarm).<br><strong style="color:var(--white)">FN:</strong> Predicted Formal but actually Informal — Type II error (missed detection, most costly for policy).</p>
+  </div>
+</div>
+
+<hr class="section-sep"/>
+
+<!-- ════════════════════════════════════════════════════
+     CLASSIFICATION REPORTS
+════════════════════════════════════════════════════ -->
+<p class="section-label" id="reports">Per-Class Reports</p>
+<h2>Detailed Classification Reports</h2>
+
+{% for name, report in data.classification.items() %}
+<h3 style="color:{{ model_colors.get(name,'var(--white)') }};margin-top:1.5rem;margin-bottom:.75rem">{{ name }}</h3>
+<div class="card" style="overflow-x:auto">
+  <table class="log-table">
+    <thead><tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Support</th></tr></thead>
+    <tbody>
+    {% if report.report %}
+      {% for cls in ['Formal','Informal'] %}
+      {% if cls in report.report %}
+      <tr>
+        <td><span class="step-badge">{{ cls }}</span></td>
+        <td style="color:var(--accent3)">{{ (report.report[cls]['precision']*100)|round(2) }}%</td>
+        <td>{{ (report.report[cls]['recall']*100)|round(2) }}%</td>
+        <td>{{ (report.report[cls]['f1-score']*100)|round(2) }}%</td>
+        <td style="color:var(--muted)">{{ report.report[cls]['support']|int }}</td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+      {% if 'accuracy' in report.report %}
+      <tr style="border-top:1px solid var(--border)">
+        <td style="color:var(--muted)"><em>Accuracy</em></td>
+        <td colspan="3" style="color:var(--accent3);font-weight:700">{{ (report.report['accuracy']*100)|round(2) }}%</td>
+        <td style="color:var(--muted)">{{ data.dataset.test }}</td>
+      </tr>
+      {% endif %}
+    {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+
+<hr class="section-sep"/>
+
+<!-- ════════════════════════════════════════════════════
+     REGRESSION METRICS
+════════════════════════════════════════════════════ -->
+<p class="section-label" id="regression">Regression Metrics</p>
+<h2>Regression Performance — Informality Index Prediction</h2>
+<p style="color:var(--muted);font-size:.9rem;margin-top:.5rem;max-width:820px">In addition to binary classification, the same models were evaluated in regression mode to predict the continuous <code style="color:var(--accent)">INFORMALITY_INDEX</code> value (range 0.0–1.0). This measures how precisely each model estimates the degree of informality.</p>
+
+<div class="card" style="margin-top:1.5rem;overflow-x:auto">
+  <table class="log-table">
+    <thead>
+      <tr><th>Model</th><th>MAE</th><th>MSE</th><th>RMSE</th><th>R²</th><th>Interpretation</th></tr>
+    </thead>
+    <tbody>
+    {% for name, m in data.regression.items() %}
+    <tr>
+      <td style="font-weight:700;color:{{ model_colors.get(name,'var(--white)') }}">{{ name }}</td>
+      <td>{{ m.mae }}</td>
+      <td>{{ m.mse }}</td>
+      <td>{{ m.rmse }}</td>
+      <td style="color:{% if m.r2 > 0.5 %}var(--accent3){% elif m.r2 > 0 %}#ffa500{% else %}var(--accent){% endif %}">{{ m.r2 }}</td>
+      <td style="color:var(--muted);font-size:.82rem">
+        {% if m.r2 > 0.5 %}Strong fit{% elif m.r2 > 0 %}Weak fit{% else %}Near-baseline{% endif %}
+        — RMSE {{ m.rmse }} index units
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Regression metric definitions -->
+<div class="two-col" style="margin-top:1.25rem">
+  <div class="info-box">
+    <h4>📐 Regression Metric Definitions</h4>
+    <p style="font-size:.85rem;color:var(--muted)">
+      <strong style="color:var(--white)">MAE:</strong> Mean Absolute Error — average error magnitude.<br>
+      <strong style="color:var(--white)">MSE:</strong> Mean Squared Error — penalizes large errors more.<br>
+      <strong style="color:var(--white)">RMSE:</strong> Root MSE — same units as the target variable.<br>
+      <strong style="color:var(--white)">R²:</strong> Coefficient of determination — % of variance explained (1.0 = perfect).
+    </p>
+  </div>
+  <div class="info-box">
+    <h4>💡 Why Low R² Is Expected</h4>
+    <p style="font-size:.85rem;color:var(--muted)">The INFORMALITY_INDEX is a binary-derived composite (mean of binary flags). Its variance is highly concentrated at 0.0 and 1.0. Continuous regression on a near-binary target yields low R² by design — classification is the appropriate approach for this variable.</p>
+  </div>
+</div>
+
+<!-- Regression plots -->
+<div class="two-col" style="margin-top:1.25rem">
+  <div class="card" style="padding:1.25rem;text-align:center">
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:.75rem">MAE · MSE · RMSE · R² across all models</p>
+    <img src="{{ url_for('static', filename='img/eval_regression_metrics.png') }}" style="width:100%;border-radius:8px" alt="Regression Metrics">
+  </div>
+  <div class="card" style="padding:1.25rem;text-align:center">
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:.75rem">Random Forest — Actual vs Predicted Informality Index</p>
+    <img src="{{ url_for('static', filename='img/eval_actual_vs_predicted.png') }}" style="width:100%;border-radius:8px" alt="Actual vs Predicted">
+  </div>
+</div>
+
+<hr class="section-sep"/>
+
+<!-- ════════════════════════════════════════════════════
+     FEATURE ANALYSIS
+════════════════════════════════════════════════════ -->
+<p class="section-label" id="features">Feature Analysis</p>
+<h2>Feature Importance & Coefficient Analysis</h2>
+
+<div class="card" style="margin-top:1.5rem;padding:1.25rem;text-align:center">
+  <img src="{{ url_for('static', filename='img/eval_feature_analysis.png') }}" style="width:100%;border-radius:8px" alt="Feature Analysis">
+</div>
+
+<div class="card" style="margin-top:1.25rem;overflow-x:auto">
+  <table class="log-table">
+    <thead><tr><th>Rank</th><th>Feature</th><th>RF Importance</th><th>Interpretation</th></tr></thead>
+    <tbody>
+    {% set feature_info = [
+      ('RUT_bin','Tax registration status — strongest single predictor of informality'),
+      ('CC_bin','Chamber of Commerce registration — key formalization signal'),
+      ('ACC_bin','Accounting records — proxy for administrative formality'),
+      ('ARL_bin','Occupational risk insurance — labor compliance indicator'),
+      ('MONTHLY_SALES','Revenue level — higher sales correlate with formalization pressure'),
+      ('WORKERS','Workforce size — larger firms face more regulatory scrutiny'),
+      ('MONTHS_OPERATING','Business age — older firms more likely to be formally registered'),
+      ('CIIU_SECTOR','Economic sector — informality rates vary significantly by activity'),
+    ] %}
+    {% for i, (feat, interp) in enumerate(feature_info) %}
+    <tr>
+      <td style="color:var(--muted)">{{ i+1 }}</td>
+      <td><code style="color:var(--accent2)">{{ feat }}</code></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <div style="background:var(--accent3);height:7px;border-radius:4px;width:{{ ((8-i)*28)|int }}px;opacity:.8"></div>
+        </div>
+      </td>
+      <td style="color:var(--muted);font-size:.83rem">{{ interp }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<hr class="section-sep"/>
+
+<!-- ════════════════════════════════════════════════════
+     BEST MODEL SELECTION
+════════════════════════════════════════════════════ -->
+<p class="section-label" id="best">Best Model Selection</p>
+<h2>Final Selected Model — <span style="color:var(--accent3)">{{ data.best_model }}</span></h2>
+
+<div class="card" style="margin-top:1.5rem;border-color:rgba(0,212,170,.35);background:rgba(0,212,170,.04)">
+  <div style="display:flex;align-items:flex-start;gap:1.25rem;flex-wrap:wrap;margin-bottom:1.25rem">
+    <span style="font-size:2.5rem;line-height:1">🏆</span>
+    <div style="flex:1">
+      <p style="color:var(--accent3);font-weight:700;font-size:1.15rem;margin-bottom:.25rem">{{ data.best_model }}</p>
+      <p style="color:var(--muted);font-size:.88rem">Selected as the best model for the commercial informality detection system — consistently top-ranked across all 9 evaluation metrics.</p>
+    </div>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+      {% if data.classification[data.best_model] %}
+      {% set bm = data.classification[data.best_model] %}
+      <div class="stat-card" style="min-width:75px;padding:.75rem 1rem">
+        <div class="stat-num" style="font-size:1.2rem">{{ bm.accuracy }}<span>%</span></div>
+        <div class="stat-label">Accuracy</div>
+      </div>
+      <div class="stat-card" style="min-width:75px;padding:.75rem 1rem">
+        <div class="stat-num" style="font-size:1.2rem;color:var(--accent2)">{{ bm.auc }}<span>%</span></div>
+        <div class="stat-label">AUC-ROC</div>
+      </div>
+      <div class="stat-card" style="min-width:75px;padding:.75rem 1rem">
+        <div class="stat-num" style="font-size:1.2rem;color:var(--accent)">{{ bm.f1 }}<span>%</span></div>
+        <div class="stat-label">F1-Score</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:.85rem">Justification for Selection</h3>
+  <div style="display:flex;flex-direction:column;gap:.6rem">
+    {% for i, reason in enumerate(data.best_justification) %}
+    <div style="display:flex;gap:.75rem;align-items:flex-start">
+      <span style="color:var(--accent3);font-weight:700;min-width:1.5rem">{{ i+1 }}.</span>
+      <p style="color:var(--muted);font-size:.88rem;margin:0">{{ reason }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Final ranking table -->
+<h3 style="margin-top:2rem;margin-bottom:1rem">Final Model Ranking</h3>
+<div class="card" style="overflow-x:auto">
+  <table class="log-table">
+    <thead>
+      <tr><th>Rank</th><th>Model</th><th>Accuracy</th><th>F1</th><th>AUC</th><th>MAE (reg)</th><th>R² (reg)</th><th>Verdict</th></tr>
+    </thead>
+    <tbody>
+      {% set ranking = [
+        ('🥇', 'Random Forest',       'var(--accent3)', 'step-badge" style="background:rgba(0,212,170,.15);color:var(--accent3)', '✅ Selected'),
+        ('🥈', 'Logistic Regression', 'var(--accent)',  'step-badge', 'Baseline'),
+        ('🥉', 'Decision Tree',       'var(--accent2)', 'step-badge" style="color:var(--muted)', 'Reference'),
+      ] %}
+      {% for medal, name, col, badge_cls, verdict in ranking %}
+      <tr>
+        <td style="font-size:1.1rem">{{ medal }}</td>
+        <td style="color:{{ col }};font-weight:700">{{ name }}</td>
+        <td>{{ data.classification[name].accuracy }}%</td>
+        <td>{{ data.classification[name].f1 }}%</td>
+        <td>{{ data.classification[name].auc }}%</td>
+        <td>{{ data.regression[name].mae }}</td>
+        <td>{{ data.regression[name].r2 }}</td>
+        <td><span class="{{ badge_cls }}">{{ verdict }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="quote-block" style="margin-top:3rem">
+  <p>"Model evaluation is not just about choosing the highest number — it is about selecting the model that best serves the business objective, generalizes to unseen data, and provides actionable insights to stakeholders."</p>
+  <cite class="quote-cite">— Adapted from CRISP-ML(Q) Phase 05: Model Evaluation. Schmid, Wurst & Wirth (2020).</cite>
+</div>
+
+{% endif %}
+{% endblock %}

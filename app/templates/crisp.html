@@ -52,7 +52,7 @@
     </div>
   </div>
 
-  <div class="phase-row" style="border-left:3px solid var(--accent2)">
+  <div class="phase-row" style="opacity:.55">
     <div class="phase-icon">🤖</div>
     <div class="phase-label">
       <div class="phase-num">Phase 04 · Active</div>
@@ -64,14 +64,15 @@
     </div>
   </div>
 
-  <div class="phase-row" style="opacity:.55">
-    <div class="phase-icon">✅</div>
+  <div class="phase-row" style="border-left:3px solid var(--accent2)">
+    <div class="phase-icon">📊</div>
     <div class="phase-label">
-      <div class="phase-num">Phase 05 · Pending</div>
-      <h3>Model Quality</h3>
+      <div class="phase-num" style="color:var(--accent2)">Phase 05 · Active</div>
+      <h3>Model Evaluation</h3>
     </div>
     <div>
-      <p style="font-size:.88rem;color:var(--muted)">Evaluate clusters with Silhouette Score (target ≥ 0.4), Davies-Bouldin Index, and WCSS. Interpret cluster profiles in business terms. Validate against known GEIH city-level informality rates.</p>
+      <p style="font-size:.88rem;color:var(--muted)">Accuracy, Precision, Recall, F1-Score, AUC-ROC (classification) + MAE, MSE, RMSE, R² (regression) evaluated on 16,205 test records. Confusion matrices, ROC curves, radar chart, and best model selection — Random Forest selected.</p>
+      <a href="/model-evaluation" style="color:var(--accent2);font-size:.82rem;font-weight:600">View Phase →</a>
     </div>
   </div>
 
