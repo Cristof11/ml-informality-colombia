@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+{% block title %}Prediction System{% endblock %}
+
+{% block content %}
+<p class="section-label">Phase 06 · CRISP-ML</p>
+<h1>Prediction System</h1>
+<p class="lead">Enter your micro-business data below to receive a real-time informality classification from the <strong style="color:var(--accent3)">Random Forest</strong> model trained on <strong style="color:var(--white)">81,021 EMICRON 2023 records</strong>.</p>
+
+<div class="two-col" style="margin-top:2rem;align-items:flex-start;gap:2rem">
+
+  <!-- ── LEFT: INPUT FORM ───────────────────────────────── -->
+  <div>
+    <div class="card" style="border-color:rgba(108,99,255,.3)">
+      <h2 style="margin-bottom:1.25rem;font-size:1.1rem">📋 Business Information</h2>
+
+      <form method="POST" action="/prediction-system" id="predForm">
+
+        <!-- Formality Flags -->
+        <p style="color:var(--accent2);font-size:.78rem;font-weight:700;letter-spacing:.08em;margin-bottom:.75rem;text-transform:uppercase">Formalization Status</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem">
+
+          <label class="toggle-card {% if form_data.get('rut','0')=='1' %}active{% endif %}">
+            <input type="checkbox" name="rut" value="1" {% if form_data.get('rut','0')=='1' %}checked{% endif %} onchange="this.form.submit()">
+            <div class="toggle-icon">📋</div>
+            <div class="toggle-label">RUT</div>
+            <div class="toggle-sub">Tax Registration (DIAN)</div>
+            <div class="toggle-status">{% if form_data.get('rut','0')=='1' %}✅ Registered{% else %}❌ Not Registered{% endif %}</div>
+          </label>
+
+          <label class="toggle-card {% if form_data.get('camara','0')=='1' %}active{% endif %}">
+            <input type="checkbox" name="camara" value="1" {% if form_data.get('camara','0')=='1' %}checked{% endif %} onchange="this.form.submit()">
+            <div class="toggle-icon">🏛️</div>
+            <div class="toggle-label">Cámara de Comercio</div>
+            <div class="toggle-sub">Chamber of Commerce</div>
+            <div class="toggle-status">{% if form_data.get('camara','0')=='1' %}✅ Registered{% else %}❌ Not Registered{% endif %}</div>
+          </label>
+
+          <label class="toggle-card {% if form_data.get('accounting','0')=='1' %}active{% endif %}">
+            <input type="checkbox" name="accounting" value="1" {% if form_data.get('accounting','0')=='1' %}checked{% endif %} onchange="this.form.submit()">
+            <div class="toggle-icon">📊</div>
+            <div class="toggle-label">Accounting Records</div>
+            <div class="toggle-sub">Keeps financial records</div>
+            <div class="toggle-status">{% if form_data.get('accounting','0')=='1' %}✅ Has Records{% else %}❌ No Records{% endif %}</div>
+          </label>
+
+          <label class="toggle-card {% if form_data.get('arl','0')=='1' %}active{% endif %}">
+            <input type="checkbox" name="arl" value="1" {% if form_data.get('arl','0')=='1' %}checked{% endif %} onchange="this.form.submit()">
+            <div class="toggle-icon">🛡️</div>
+            <div class="toggle-label">ARL</div>
+            <div class="toggle-sub">Occupational Risk Insurance</div>
+            <div class="toggle-status">{% if form_data.get('arl','0')=='1' %}✅ Affiliated{% else %}❌ Not Affiliated{% endif %}</div>
+          </label>
+
+        </div>
+
+        <!-- Numeric inputs -->
+        <p style="color:var(--accent2);font-size:.78rem;font-weight:700;letter-spacing:.08em;margin-bottom:.75rem;text-transform:uppercase">Business Profile</p>
+
+        <div style="display:flex;flex-direction:column;gap:.85rem;margin-bottom:1.25rem">
+
+          <div class="input-group">
+            <label>👥 Number of Workers <span style="color:var(--muted);font-size:.8rem">(1–9)</span></label>
+            <input type="number" name="workers" min="1" max="9"
+                   value="{{ form_data.get('workers', '1') }}"
+                   placeholder="1" class="form-input">
+          </div>
+
+          <div class="input-group">
+            <label>📅 Months in Operation</label>
+            <input type="number" name="months_operating" min="1" max="600"
+                   value="{{ form_data.get('months_operating', '12') }}"
+                   placeholder="12" class="form-input">
+          </div>
+
+          <div class="input-group">
+            <label>💰 Monthly Sales (COP) <span style="color:var(--muted);font-size:.8rem">Previous month</span></label>
+            <input type="number" name="monthly_sales" min="0"
+                   value="{{ form_data.get('monthly_sales', '1000000') }}"
+                   placeholder="1000000" class="form-input">
+          </div>
+
+          <div class="input-group">
+            <label>🏭 Economic Sector (CIIU)</label>
+            <select name="ciiu_sector" class="form-input">
+              {% for code, label in ciiu_labels.items() %}
+              <option value="{{ code }}"
+                {% if form_data.get('ciiu_sector', '3')|string == code|string %}selected{% endif %}>
+                {{ code }} — {{ label }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-predict" id="submitBtn">
+          🔮 Generate Prediction
+        </button>
+
+      </form>
+
+      <!-- Quick examples -->
+      <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <p style="color:var(--muted);font-size:.8rem;margin-bottom:.6rem">Quick examples:</p>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <a href="/prediction-system?preset=informal" onclick="loadPreset('informal');return false;"
+             style="font-size:.78rem;color:var(--accent);background:rgba(232,71,138,.1);border:1px solid rgba(232,71,138,.3);padding:.25rem .6rem;border-radius:6px;cursor:pointer;text-decoration:none">🔴 Informal example</a>
+          <a href="/prediction-system?preset=formal" onclick="loadPreset('formal');return false;"
+             style="font-size:.78rem;color:var(--accent3);background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);padding:.25rem .6rem;border-radius:6px;cursor:pointer;text-decoration:none">🟢 Formal example</a>
+          <a href="/prediction-system?preset=gateway" onclick="loadPreset('gateway');return false;"
+             style="font-size:.78rem;color:#ffa500;background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);padding:.25rem .6rem;border-radius:6px;cursor:pointer;text-decoration:none">🟠 Partial example</a>
+        </div>
+      </div>
+
+    </div><!-- /card -->
+  </div><!-- /left -->
+
+  <!-- ── RIGHT: RESULTS ─────────────────────────────────── -->
+  <div>
+    {% if result %}
+
+      {% if not result.success %}
+      <div class="card" style="border-color:var(--accent)">
+        <p style="color:var(--accent)">⚠️ {{ result.error }}</p>
+      </div>
+
+      {% else %}
+
+      <!-- Main result card -->
+      <div class="card result-card
+        {% if result.prediction == 1 %}result-informal{% else %}result-formal{% endif %}">
+
+        <div style="text-align:center;margin-bottom:1.5rem">
+          <div style="font-size:3.5rem;margin-bottom:.5rem">
+            {% if result.prediction == 1 %}⚠️{% else %}✅{% endif %}
+          </div>
+          <h2 style="font-size:2rem;margin-bottom:.25rem;color:
+            {% if result.prediction == 1 %}var(--accent){% else %}var(--accent3){% endif %}">
+            {{ result.label }}
+          </h2>
+          <p style="color:var(--muted);font-size:.9rem">
+            Informality Risk: <strong style="color:
+              {% if result.risk_color == 'danger' %}var(--accent)
+              {% elif result.risk_color == 'warning' %}#ffa500
+              {% else %}var(--accent3){% endif %}">
+              {{ result.risk_level }}
+            </strong>
+          </p>
+        </div>
+
+        <!-- Probability bars -->
+        <div style="margin-bottom:1.5rem">
+          <p style="color:var(--muted);font-size:.82rem;margin-bottom:.6rem;font-weight:600">Classification Probabilities</p>
+
+          <div style="margin-bottom:.75rem">
+            <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem">
+              <span style="color:var(--accent3)">🟢 Formal</span>
+              <span style="color:var(--accent3);font-weight:700">{{ result.prob_formal }}%</span>
+            </div>
+            <div style="background:rgba(255,255,255,.08);border-radius:8px;height:10px;overflow:hidden">
+              <div style="background:var(--accent3);height:100%;border-radius:8px;width:{{ result.prob_formal }}%;transition:width .6s ease"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem">
+              <span style="color:var(--accent)">🔴 Informal</span>
+              <span style="color:var(--accent);font-weight:700">{{ result.prob_informal }}%</span>
+            </div>
+            <div style="background:rgba(255,255,255,.08);border-radius:8px;height:10px;overflow:hidden">
+              <div style="background:var(--accent);height:100%;border-radius:8px;width:{{ result.prob_informal }}%;transition:width .6s ease"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informality Index -->
+        <div style="margin-bottom:1.5rem;background:rgba(255,255,255,.04);border-radius:10px;padding:1rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+            <span style="color:var(--muted);font-size:.83rem">Informality Index</span>
+            <span style="font-size:1.3rem;font-weight:700;color:
+              {% if result.inf_index >= 0.75 %}var(--accent)
+              {% elif result.inf_index >= 0.5 %}#ffa500
+              {% else %}var(--accent3){% endif %}">
+              {{ result.inf_index }}
+            </span>
+          </div>
+          <div style="background:rgba(255,255,255,.08);border-radius:8px;height:12px;overflow:hidden">
+            <div style="background:linear-gradient(90deg,var(--accent3),#ffa500,var(--accent));
+                        height:100%;border-radius:8px;width:{{ (result.inf_index * 100)|int }}%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:.3rem">
+            <span>0.0 — Fully Formal</span><span>1.0 — Fully Informal</span>
+          </div>
+        </div>
+
+        <!-- Formality flags -->
+        <div style="margin-bottom:1.25rem">
+          <p style="color:var(--muted);font-size:.82rem;margin-bottom:.6rem;font-weight:600">Formalization Flags</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+            {% for flag, label in [('rut','RUT'),('cc','Cámara'),('acc','Accounting'),('arl','ARL')] %}
+            <div style="display:flex;align-items:center;gap:.5rem;font-size:.83rem;
+                        background:rgba(255,255,255,.04);border-radius:8px;padding:.5rem .75rem">
+              <span>{% if result.formality_flags[flag] %}✅{% else %}❌{% endif %}</span>
+              <span style="color:{% if result.formality_flags[flag] %}var(--accent3){% else %}var(--accent){% endif %}">{{ label }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div><!-- /result-card -->
+
+      <!-- Input summary -->
+      <div class="card" style="margin-top:1rem">
+        <h3 style="font-size:.9rem;margin-bottom:.75rem;color:var(--muted)">📥 Input Summary</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem">
+          {% for key, val in result.input_summary.items() %}
+          <div style="font-size:.82rem;color:var(--muted)">
+            <span style="color:var(--white);text-transform:capitalize">{{ key.replace('_',' ') }}:</span>
+            {{ val }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="card" style="margin-top:1rem;border-color:rgba(108,99,255,.25)">
+        <h3 style="font-size:.9rem;margin-bottom:.85rem">💡 Formalization Recommendations</h3>
+        {% for rec in result.recommendations %}
+        <div style="display:flex;gap:.75rem;align-items:flex-start;margin-bottom:.85rem;
+                    padding:.75rem;background:rgba(255,255,255,.03);border-radius:10px">
+          <span style="font-size:1.3rem;flex-shrink:0">{{ rec.icon }}</span>
+          <div>
+            <p style="font-weight:600;color:var(--white);font-size:.88rem;margin-bottom:.2rem">{{ rec.title }}</p>
+            <p style="color:var(--muted);font-size:.82rem">{{ rec.detail }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% endif %}
+
+    {% else %}
+
+    <!-- No prediction yet — placeholder -->
+    <div class="card" style="text-align:center;padding:3rem 2rem;border-style:dashed">
+      <div style="font-size:4rem;margin-bottom:1rem;opacity:.4">🔮</div>
+      <p style="color:var(--muted);font-size:.95rem">Fill in the form and click<br><strong style="color:var(--white)">Generate Prediction</strong><br>to see the results here.</p>
+    </div>
+
+    <!-- How it works -->
+    <div class="card" style="margin-top:1rem">
+      <h3 style="margin-bottom:1rem;font-size:.95rem">⚙️ How It Works</h3>
+      <div style="display:flex;flex-direction:column;gap:.6rem">
+        {% for step, desc in [
+          ('1. Input data','Enter business formalization status and operational data'),
+          ('2. Feature engineering','System applies log-transform and StandardScaler normalization'),
+          ('3. Random Forest predicts','100 decision trees vote on formal vs informal classification'),
+          ('4. Results displayed','Prediction, probabilities, informality index, and recommendations'),
+        ] %}
+        <div style="display:flex;gap:.75rem;align-items:flex-start">
+          <span style="color:var(--accent2);font-weight:700;font-size:.83rem;min-width:100px">{{ step }}</span>
+          <span style="color:var(--muted);font-size:.83rem">{{ desc }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% endif %}
+  </div><!-- /right -->
+
+</div><!-- /two-col -->
+
+<!-- Model info footer -->
+<div class="quote-block" style="margin-top:3rem">
+  <p>"This prediction system deploys the Random Forest model trained on 81,021 real EMICRON 2023 micro-business records from DANE Colombia. The model identifies commercial informality patterns using four key formalization indicators: RUT registration, Chamber of Commerce, accounting records, and ARL insurance."</p>
+  <cite class="quote-cite">— CRISP-ML(Q) Phase 06: Deployment. Schmid, Wurst & Wirth (2020).</cite>
+</div>
+
+<style>
+/* ── Toggle cards ── */
+.toggle-card {
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:.85rem .6rem;border-radius:12px;cursor:pointer;
+  border:1.5px solid var(--border);background:rgba(255,255,255,.03);
+  transition:all .2s;position:relative;
+}
+.toggle-card input[type="checkbox"] { position:absolute;opacity:0;width:0;height:0; }
+.toggle-card:hover { border-color:var(--accent2);background:rgba(108,99,255,.07); }
+.toggle-card.active { border-color:var(--accent3);background:rgba(0,212,170,.08); }
+.toggle-icon { font-size:1.5rem;margin-bottom:.3rem; }
+.toggle-label { font-size:.82rem;font-weight:600;color:var(--white); }
+.toggle-sub   { font-size:.72rem;color:var(--muted);margin-top:.15rem; }
+.toggle-status{ font-size:.72rem;margin-top:.35rem;font-weight:600; }
+
+/* ── Form inputs ── */
+.input-group label {
+  display:block;font-size:.83rem;color:var(--muted);margin-bottom:.35rem;font-weight:500;
+}
+.form-input {
+  width:100%;background:rgba(255,255,255,.05);border:1.5px solid var(--border);
+  color:var(--white);border-radius:8px;padding:.55rem .75rem;font-size:.9rem;
+  font-family:inherit;outline:none;box-sizing:border-box;transition:border-color .2s;
+}
+.form-input:focus { border-color:var(--accent2); }
+.form-input option { background:#1c2035;color:var(--white); }
+
+/* ── Submit button ── */
+.btn-predict {
+  width:100%;padding:.9rem;background:linear-gradient(135deg,var(--accent2),var(--accent));
+  color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;
+  cursor:pointer;transition:opacity .2s,transform .1s;font-family:inherit;
+}
+.btn-predict:hover { opacity:.9;transform:translateY(-1px); }
+.btn-predict:active { transform:translateY(0); }
+
+/* ── Result cards ── */
+.result-card { }
+.result-informal { border-color:rgba(232,71,138,.4) !important;background:rgba(232,71,138,.04) !important; }
+.result-formal   { border-color:rgba(0,212,170,.4) !important;background:rgba(0,212,170,.04) !important; }
+</style>
+
+<script>
+function loadPreset(type) {
+  const presets = {
+    informal: { rut:0, camara:0, accounting:0, arl:0, workers:1, months_operating:6,  monthly_sales:500000,  ciiu_sector:1 },
+    formal:   { rut:1, camara:1, accounting:1, arl:1, workers:3, months_operating:48, monthly_sales:5000000, ciiu_sector:3 },
+    gateway:  { rut:1, camara:0, accounting:0, arl:0, workers:2, months_operating:24, monthly_sales:1500000, ciiu_sector:3 },
+  };
+  const p = presets[type];
+  const form = document.getElementById('predForm');
+
+  // Checkboxes
+  ['rut','camara','accounting','arl'].forEach(name => {
+    const cb = form.querySelector(`input[name="${name}"]`);
+    if (cb) cb.checked = p[name] === 1;
+  });
+  // Number inputs
+  ['workers','months_operating','monthly_sales','ciiu_sector'].forEach(name => {
+    const el = form.querySelector(`[name="${name}"]`);
+    if (el) el.value = p[name];
+  });
+
+  form.submit();
+}
+</script>
+{% endblock %}
